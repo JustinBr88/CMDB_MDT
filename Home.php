@@ -1,3 +1,6 @@
+<?php
+include 'loginSesion.php';
+?>
 <!DOCTYPE html>
 <html lang="es">
   <head>

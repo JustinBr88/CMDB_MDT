@@ -18,7 +18,7 @@ class Conexion {
         return $this->conn;
     }
     public function validarsuario($usuario, $contrasena) {
-        $stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE usuario = ? ");
+        $stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE nombre = ? ");
         $stmt->bind_param("s", $usuario);
         $stmt->execute();
         $result = $stmt->get_result();
