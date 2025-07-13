@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,6 +23,32 @@
     rel="stylesheet"
   />
   <link href="css/style.css" rel="stylesheet" />
+  <style>
+    .profile-pic-navbar-lg {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #007bff;
+      background: #fff;
+      display: block;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .profile-pic-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+    .profile-username-navbar {
+      margin-top: 7px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #222;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <!-- Header Start -->
@@ -40,36 +71,63 @@
           </div>
         </form>
       </div>
+      <!-- Foto de perfil o imagen por defecto + nombre o mensaje -->
       <div class="col-lg-4 col-6 text-right">
-        <p class="m-0">Nuestro Instagram</p>
-        <a><h5 class="m-0">@mdtecnologiapa</h5></a>
+        <div class="profile-pic-wrapper">
+          <?php
+            // Si el usuario está logueado y tiene foto, mostrarla. Sino, mostrar la default.
+            if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
+                $foto = $_SESSION['foto'];
+            } else {
+                $foto = 'img/default_profile.png';
+            }
+            // Nombre del usuario, si está logueado
+            if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
+                $nombreUsuario = htmlspecialchars($_SESSION['usuario']);
+            } else {
+                $nombreUsuario = "Inicia sesión para continuar";
+            }
+          ?>
+          <img src="<?php echo htmlspecialchars($foto); ?>" class="profile-pic-navbar-lg" alt="Foto de perfil">
+          <div class="profile-username-navbar">
+            <?php echo $nombreUsuario; ?>
+          </div>
+        </div>
       </div>
     </div>
     <!-- Navbar Start -->
-    <div class="container-fluid bg-dark mb-30">
-      <div class="row px-xl-5">
-        <div class="col-lg-3 d-none d-lg-block">
-          <a class="btn d-flex align-items-center justify-content-between bg-primary w-100"
-             data-toggle="collapse"
-             href="#navbar-vertical"
-             style="height: 65px; padding: 0 30px">
-            <h6 class="text-dark m-0">
-              <i class="fa fa-bars mr-2"></i>Categorías
-            </h6>
-            <i class="fa fa-angle-down text-dark"></i>
-          </a>
-          <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light"
-               id="navbar-vertical"
-               style="width: calc(100% - 30px); z-index: 999"
-               aria-label="Navegación de categorías">
-            <div class="navbar-nav w-100" id="navbar-categorias">
-              <!-- Aquí puedes cargar dinámicamente las categorías -->
-            </div>
-          </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand d-lg-none" href="Home.php">MD Tecnología</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+          aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
+            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
+            <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
+          </ul>
+          <ul class="navbar-nav ml-auto">
+            <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
+              <li class="nav-item">
+                <a class="nav-link text-light" href="Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-danger font-weight-bold" href="logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+              </li>
+            <?php else: ?>
+              <li class="nav-item">
+                <a class="nav-link text-primary font-weight-bold" href="Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+              </li>
+            <?php endif; ?>
+          </ul>
         </div>
-        <!-- Puedes agregar aquí más ítems del menú horizontal -->
       </div>
-    </div>
+    </nav>
     <!-- Navbar End -->
   </header>
   <!-- Header End -->

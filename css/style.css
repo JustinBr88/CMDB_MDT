@@ -1442,3 +1442,27 @@ h6 {
 .fade:not(.show) {
   opacity: 0;
 }
+.profile-pic-navbar-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+  background: #fff;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.profile-pic-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+.profile-username-navbar {
+  margin-top: 7px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
+  text-align: center;
+}
