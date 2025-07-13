@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 12, 2025 at 11:39 PM
+-- Generation Time: Jul 13, 2025 at 01:29 AM
 -- Server version: 11.5.2-MariaDB
 -- PHP Version: 8.3.14
 
@@ -136,7 +136,14 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `fecha_creacion` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+--
+-- Dumping data for table `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nombre`, `correo`, `contrasena`, `rol`, `Activo`, `fecha_creacion`) VALUES
+(1, 'Tilin', 'Tilin@gmail.com', '$2y$10$GtD7n.u21a0KN2KjdgEZA.Df1hNCY4nuXo1yYPCOliycv7jSWfe1y', 'usuario', 0, '2025-07-12 23:46:38');
 
 --
 -- Constraints for dumped tables
