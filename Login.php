@@ -260,7 +260,7 @@
 
       <div class="col-md-4 mx-3">
         <h2 class="text-center">Iniciar Sesión</h2>
-        <form id="loginBtn">
+        <form id="loginForm" method="POST">
           <div class="mb-3">
             <input
               type="text"
@@ -359,9 +359,7 @@
     </div>
 </footer>
     <!-- Footer End -->
-
     <!-- JavaScript -->
-    <script type="module" src="js/main.js"></script>
     <script type="module" src="js/login.js"></script>
   </body>
 </html>
