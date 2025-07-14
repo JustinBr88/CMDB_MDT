@@ -76,10 +76,10 @@
         </thead>
         <tbody>
             <?php
-            // Mostrar inventario
-            $sql = "SELECT i.*, c.nombre AS categoria FROM inventario i JOIN categorias c ON i.categoria_id = c.id";
-            $result = $conn->query($sql);
-            while($row = $result->fetch_assoc()){
+            include('conexion.php');
+            $conexion = new Conexion();
+            $result = $conexion->obtenerCategoriasyinventario();
+            foreach ($result as $row) {
                 echo "<tr>
                     <td>{$row['id']}</td>
                     <td>{$row['nombre_equipo']}</td>
@@ -93,7 +93,6 @@
                     <td>{$row['estado']}</td>
                 </tr>";
             }
-            $conn->close();
             ?>
         </tbody>
     </table>

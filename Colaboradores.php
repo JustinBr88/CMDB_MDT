@@ -46,9 +46,10 @@
                 <label>Departamento</label>
                 <select name="departamento_id" class="form-control" required>
                     <?php
-                    $conn = new mysqli("localhost", "root", "", "cmdb");
-                    $result = $conn->query("SELECT id, nombre FROM departamentos");
-                    while($row = $result->fetch_assoc()){
+                    require_once('conexion.php');
+                    $conexion = new Conexion();
+                    $result =$conexion->obtenerDepartamentos();
+                    foreach ($result as $row) {
                         echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
                     }
                     ?>
@@ -70,8 +71,9 @@
         </thead>
         <tbody>
             <?php
-            $result = $conn->query("SELECT c.*, d.nombre as dep_nombre FROM colaboradores c LEFT JOIN departamentos d ON c.departamento_id = d.id");
-            while($row = $result->fetch_assoc()){
+            $conexion = new Conexion();
+            $result = $conexion->obtenercolaboradores();
+            foreach ($result as $row) {
                 echo "<tr>
                     <td>{$row['id']}</td>
                     <td>{$row['nombre']}</td>
@@ -85,7 +87,6 @@
                     <td>{$row['dep_nombre']}</td>
                 </tr>";
             }
-            $conn->close();
             ?>
         </tbody>
     </table>

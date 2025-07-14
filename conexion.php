@@ -3,7 +3,7 @@
 class Conexion {
     private $servername = "localhost";
     private $username = "root";
-    private $password = "1234";
+    private $password = "";
     private $dbname = "cmdb";
     private $conn;
 
@@ -34,6 +34,39 @@ class Conexion {
             $this->conn->close();
         }
     }
-
+    public function obtenerCategoriasyinventario() {
+        $sql = "SELECT i.*, c.nombre AS categoria FROM inventario i JOIN categorias c ON i.categoria_id = c.id";
+        $result = $this->conn->query($sql);
+        $inventario = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $inventario[] = $row;
+            }
+        }
+        return $inventario;
+    }
+   public function obtenerDepartamentos() {
+        $sql = "SELECT id, nombre FROM departamentos";
+        $result = $this->conn->query($sql);
+        $departamentos = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $departamentos[] = $row;
+            }
+        }
+        return $departamentos;
+    }
+    public function obtenercolaboradores() {
+        $sql = "SELECT c.*, d.nombre as dep_nombre FROM colaboradores c LEFT JOIN departamentos d ON c.departamento_id = d.id";
+        $result = $this->conn->query($sql);
+        $colaboradores = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $colaboradores[] = $row;
+            }
+        }
+        return $colaboradores;
+    }
+    
 }
 ?>
