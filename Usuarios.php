@@ -47,9 +47,10 @@
         </thead>
         <tbody>
             <?php
-            $conn = new mysqli("localhost", "root", "", "cmdb");
-            $result = $conn->query("SELECT * FROM usuarios");
-            while($row = $result->fetch_assoc()){
+            require_once('conexion.php');
+            $conexion = new Conexion();
+            $result = $conexion->obtenerUsuarios();
+            foreach ($result as $row) {
                 echo "<tr>
                     <td>{$row['id']}</td>
                     <td>{$row['nombre']}</td>
@@ -59,7 +60,6 @@
                     <td>{$row['fecha_creacion']}</td>
                 </tr>";
             }
-            $conn->close();
             ?>
         </tbody>
     </table>

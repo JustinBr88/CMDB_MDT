@@ -14,9 +14,10 @@
                 <select name="categoria_id" class="form-control" required>
                     <?php
                     // Cargar categorías
-                    $conn = new mysqli("localhost", "root", "", "cmdb");
-                    $result = $conn->query("SELECT id, nombre FROM categorias");
-                    while($row = $result->fetch_assoc()){
+                    include('conexion.php');
+                     $conexion = new Conexion();
+                    $result = $conexion->obtenerCategorias();
+                    foreach ($result as $row) {
                         echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
                     }
                     ?>
@@ -76,8 +77,6 @@
         </thead>
         <tbody>
             <?php
-            include('conexion.php');
-            $conexion = new Conexion();
             $result = $conexion->obtenerCategoriasyinventario();
             foreach ($result as $row) {
                 echo "<tr>

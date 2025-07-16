@@ -1466,3 +1466,9 @@ h6 {
   color: #222;
   text-align: center;
 }
+.login-center-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

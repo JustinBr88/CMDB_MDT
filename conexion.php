@@ -3,7 +3,7 @@
 class Conexion {
     private $servername = "localhost";
     private $username = "root";
-    private $password = "";
+    private $password = "1234";
     private $dbname = "cmdb";
     private $conn;
 
@@ -67,6 +67,28 @@ class Conexion {
         }
         return $colaboradores;
     }
-    
+    public function obtenerCategorias() {
+        $sql = "SELECT * FROM categorias";
+        $result = $this->conn->query($sql);
+        $categorias = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $categorias[] = $row;
+            }
+        }
+        return $categorias;
+    }
+    public function obtenerUsuarios() {
+        $sql = "SELECT id, nombre FROM usuarios";
+        $result = $this->conn->query($sql);
+        $usuarios = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $usuarios[] = $row;
+            }
+        }
+        return $usuarios;
+    }
+
 }
 ?>
