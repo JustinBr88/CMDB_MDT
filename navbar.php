@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <title>MD Tecnología</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <!-- Favicon -->
-  <link href="img/favicon.ico" rel="icon" />
+  <link href="/img/favicon.ico" rel="icon" />
   <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
@@ -55,8 +55,8 @@ if (session_status() === PHP_SESSION_NONE) {
   <header>
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex" style="margin-right: 0px">
       <div class="col-lg-4">
-        <a href="Home.php" class="text-decoration-none">
-          <img src="img/logo.png" alt="logo" />
+        <a href="/Home.php" class="text-decoration-none">
+          <img src="/img/logo.png" alt="logo" />
         </a>
       </div>
       <div class="col-lg-4 col-6 text-left">
@@ -79,7 +79,7 @@ if (session_status() === PHP_SESSION_NONE) {
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
                 $foto = $_SESSION['foto'];
             } else {
-                $foto = 'img/default_profile.png';
+                $foto = '/img/default_profile.png';
             }
             // Nombre del usuario, si está logueado
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
@@ -98,30 +98,30 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand d-lg-none" href="Home.php">MD Tecnología</a>
+        <a class="navbar-brand d-lg-none" href="/Home.php">MD Tecnología</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
           aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
-            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
-            <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link" href="/Home.php"><i class="fa fa-home"></i> Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="/Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" href="/Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
+            <li class="nav-item"><a class="nav-link" href="/colaboradores/Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
+            <li class="nav-item"><a class="nav-link" href="/Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
               <li class="nav-item">
-                <a class="nav-link text-light" href="Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+                <a class="nav-link text-light" href="/Perfil.php"><i class="fa fa-user"></i> Perfil</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-danger font-weight-bold" href="logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+                <a class="nav-link text-danger font-weight-bold" href="/logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link text-primary font-weight-bold" href="Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+                <a class="nav-link text-primary font-weight-bold" href="/Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
               </li>
             <?php endif; ?>
           </ul>

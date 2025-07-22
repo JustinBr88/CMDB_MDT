@@ -72,6 +72,15 @@ CREATE TABLE usuarios (
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE historial_accesos_colaborador (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    colaborador_id INT NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    ip VARCHAR(45),
+    user_agent VARCHAR(255),
+    FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id) ON DELETE CASCADE
+);
+
 -- Ejemplo de datos base
 INSERT INTO categorias (nombre, descripcion) VALUES
 ('Software', 'Programas informáticos'),
