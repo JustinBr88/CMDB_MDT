@@ -1,7 +1,7 @@
 <?php 
-include('loginSesion.php'); 
-include('navbar.php'); 
-require_once('conexion.php');
+include 'loginSesionColaborador.php';
+include(__DIR__ . '/../navbar.php');
+require_once(__DIR__ . '/../conexion.php');
 $conexion = new Conexion();
 
 // --- Procesamiento del formulario ---
@@ -148,4 +148,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear'])) {
         </tbody>
     </table>
 </div>
-<?php include('footer.php'); ?>
+<?php include(__DIR__ . '/../footer.php'); ?>

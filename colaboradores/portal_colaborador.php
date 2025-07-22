@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once 'conexion.php';
+include 'loginSesionColaborador.php';
+require_once(__DIR__ . '/../conexion.php');
 
 // Validación de sesión colaborador
 if (!isset($_SESSION['colaborador_logeado']) || !$_SESSION['colaborador_logeado']) {
@@ -66,7 +67,7 @@ if (isset($_SESSION['colab_pass_msg'])) {
     unset($_SESSION['colab_pass_msg']);
 }
 ?>
-<?php include('navbar.php'); ?>
+<?php include(__DIR__ . '/../navbar.php'); ?>
 
 <!-- Breadcrumb Start -->
 <div class="container-fluid">
@@ -222,4 +223,4 @@ if (isset($_SESSION['colab_pass_msg'])) {
   </div>
 </div>
 
-<?php include('footer.php'); ?>
+<?php include(__DIR__ . '/../footer.php'); ?>
