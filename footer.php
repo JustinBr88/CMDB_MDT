@@ -14,6 +14,7 @@
   <!-- Footer End -->
   <!-- Scripts generales -->
   <script src="js/main.js"></script>
+  <script src="js/colaboradores.js"></script>
   <!-- Puedes incluir aquí otros scripts globales -->
 </body>
 </html>

@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     rel="stylesheet"
   />
-  <link href="css/style.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css">
   <style>
     .profile-pic-navbar-lg {
       width: 80px;
