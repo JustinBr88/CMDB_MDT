@@ -16,7 +16,16 @@ CREATE TABLE categorias (
   nombre VARCHAR(50) NOT NULL,
   descripcion TEXT
 );
-
+-- Usuarios
+CREATE TABLE usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  correo VARCHAR(100) NOT NULL UNIQUE,
+  contrasena VARCHAR(255) NOT NULL,
+  rol ENUM('admin','tecnico') DEFAULT 'tecnico',
+  activo TINYINT(1) DEFAULT 1,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 -- Colaboradores
 CREATE TABLE colaboradores (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,16 +85,6 @@ CREATE TABLE asignaciones (
   FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id)
 );
 
--- Usuarios
-CREATE TABLE usuarios (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  correo VARCHAR(100) NOT NULL UNIQUE,
-  contrasena VARCHAR(255) NOT NULL,
-  rol ENUM('admin','tecnico') DEFAULT 'tecnico',
-  activo TINYINT(1) DEFAULT 1,
-  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE TABLE historial_accesos_colaborador (
     id INT AUTO_INCREMENT PRIMARY KEY,
