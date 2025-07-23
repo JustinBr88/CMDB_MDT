@@ -104,7 +104,6 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Equipo de cómputo', 'Computadoras y periféricos'),
 ('Equipo de telefonía', 'Teléfonos y accesorios');
 
-
 -- 1. Software
 INSERT INTO inventario (nombre_equipo, categoria_id, marca, modelo, numero_serie, costo, fecha_ingreso, tiempo_depreciacion, estado, descripcion, imagen)
 VALUES
@@ -134,4 +133,24 @@ INSERT INTO inventario (nombre_equipo, categoria_id, marca, modelo, numero_serie
 VALUES
 ('Teléfono IP Yealink', 5, 'Yealink', 'T21P E2', 'SNYEALINKT21', 55.00, '2024-07-01', 24, 'inventario', 'Teléfono IP para sala de reuniones.', 'yealinkt21p.png'),
 ('Auriculares Jabra Evolve', 5, 'Jabra', 'Evolve 20', 'SNJABRAEV20', 70.00, '2024-06-20', 24, 'inventario', 'Auriculares con micrófono para call center.', 'jabraevolve20.png');
+
+-- Inserta primero un departamento para la FK (ajusta el id si ya tienes uno)
+INSERT INTO departamentos (nombre, ubicacion) VALUES ('Sistemas', 'Planta Baja');
+
+-- Usuario colaborador (en ambas tablas)
+INSERT INTO usuarios (nombre, correo, contrasena, rol, activo)
+VALUES ('Juan Pérez', 'colaborador@midominio.com', 'colaborador123', 'tecnico', 1);
+
+-- Colaborador vinculado (puedes poner el mismo correo y un departamento_id válido)
+INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
+VALUES ('Juan', 'Pérez', 'C123456', 'juan.jpg', 'Calle 1 #123', 'Oficina A', '5551234567', 'colaborador@midominio.com', 1, 1);
+
+-- Usuario administrador
+INSERT INTO usuarios (nombre, correo, contrasena, rol, activo)
+VALUES ('Ana García', 'admin@midominio.com', 'admin123', 'admin', 1);
+
+-- (Opcional) Si quieres registrar a Ana como colaboradora también (por ejemplo, si los admins pueden ser colaboradores)
+INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
+VALUES ('Ana', 'García', 'A654321', 'ana.jpg', 'Calle 2 #456', 'Oficina B', '5559876543', 'admin@midominio.com', 1, 1);
+
 COMMIT;

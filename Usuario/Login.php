@@ -7,8 +7,8 @@
             class="breadcrumb bg-light mb-30"
             aria-label="Ruta de navegación iniciar sesión"
           >
-            <a class="breadcrumb-item text-dark" href="Home.html">Inicio</a>
-            <a class="breadcrumb-item text-dark" href="Perfil.html">Perfil</a>
+            <a class="breadcrumb-item text-dark" href="Home.php">Inicio</a>
+            <a class="breadcrumb-item text-dark" href="Perfil.php">Perfil</a>
             <span class="breadcrumb-item active">Login</span>
           </nav>
         </div>

@@ -3,7 +3,7 @@
 <div class="container mt-5">
     <h2>Inventario - Equipos y Software</h2>
     <!-- Formulario de Alta -->
-    <form action="Inventario.php" method="post" class="mb-4">
+    <form action="Inventario.php" method="post" enctype="multipart/form-data" class="mb-4">
         <div class="row">
             <div class="col-md-4">
                 <label>Nombre del equipo</label>
@@ -13,9 +13,8 @@
                 <label>Categoría</label>
                 <select name="categoria_id" class="form-control" required>
                     <?php
-                    // Cargar categorías
                     include('conexion.php');
-                     $conexion = new Conexion();
+                    $conexion = new Conexion();
                     $result = $conexion->obtenerCategorias();
                     foreach ($result as $row) {
                         echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
@@ -60,8 +59,17 @@
                     <option value="descarte">En descarte</option>
                     <option value="donado">Donado</option>
                     <option value="inventario">Inventario</option>
+                    <option value="solicitado">Solicitado</option>
+                    <option value="asignado">Asignado</option>
                 </select>
             </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <label>Imagen del equipo/software</label>
+                <input type="file" name="imagen" class="form-control" accept="image/*">
+            </div>
+            <div class="col-md-8"></div>
         </div>
         <div class="mt-3">
             <button class="btn btn-primary" type="submit" name="crear">Agregar al inventario</button>
@@ -71,15 +79,40 @@
     <table class="table table-bordered table-striped mt-4">
         <thead class="thead-dark">
             <tr>
-                <th>ID</th><th>Nombre</th><th>Categoría</th><th>Marca</th>
-                <th>Modelo</th><th>Serie</th><th>Costo</th><th>Ingreso</th><th>Depreciación</th><th>Estado</th>
+                <th>Imagen</th>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Serie</th>
+                <th>Costo</th>
+                <th>Ingreso</th>
+                <th>Depreciación</th>
+                <th>Estado</th>
+                <th>Asignado a</th>
+                <th>Acciones</th>
+                <th>Ver solicitudes</th>
             </tr>
         </thead>
         <tbody>
             <?php
             $result = $conexion->obtenerCategoriasyinventario();
             foreach ($result as $row) {
+                // Obtener colaborador asignado
+                $asignado = '';
+                if ($row['estado'] == 'asignado') {
+                    $asig = $conexion->getAsignacionActual($row['id']);
+                    $asignado = $asig ? $asig['colaborador'] : '';
+                }
                 echo "<tr>
+                    <td>";
+                if (!empty($row['imagen'])) {
+                    echo "<img src='uploads/{$row['imagen']}' width='60'>";
+                } else {
+                    echo "<img src='img/equipo.jpg' width='60'>";
+                }
+                echo "</td>
                     <td>{$row['id']}</td>
                     <td>{$row['nombre_equipo']}</td>
                     <td>{$row['categoria']}</td>
@@ -90,6 +123,14 @@
                     <td>{$row['fecha_ingreso']}</td>
                     <td>{$row['tiempo_depreciacion']}</td>
                     <td>{$row['estado']}</td>
+                    <td>{$asignado}</td>
+                    <td>
+                        <a href='editar_equipo.php?id={$row['id']}' class='btn btn-sm btn-warning'>Editar</a>
+                        <a href='eliminar_equipo.php?id={$row['id']}' class='btn btn-sm btn-danger' onclick=\"return confirm('¿Seguro de eliminar?')\">Eliminar</a>
+                    </td>
+                    <td>
+                        <a href='ver_solicitudes.php?id={$row['id']}' class='btn btn-sm btn-info'>Ver solicitudes</a>
+                    </td>
                 </tr>";
             }
             ?>

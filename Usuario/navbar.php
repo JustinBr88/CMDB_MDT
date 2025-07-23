@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
   <style>
     .profile-pic-navbar-lg {
       width: 80px;
@@ -98,18 +98,18 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand d-lg-none" href="/Home.php">MD Tecnología</a>
+        <a class="navbar-brand d-lg-none" href="Home.php">MD Tecnología</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
           aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item"><a class="nav-link" href="/Home.php"><i class="fa fa-home"></i> Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
+            <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="/Equipo/Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
             <li class="nav-item"><a class="nav-link" href="/colaboradores/Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
