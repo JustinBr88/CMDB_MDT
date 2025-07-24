@@ -8,7 +8,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     formData.append('contrasena', contrasena);
 
     try {
-        const response = await fetch('validar_login.php', {
+        const response = await fetch('../validar_login.php', {
             method: 'POST',
             body: formData
         });
