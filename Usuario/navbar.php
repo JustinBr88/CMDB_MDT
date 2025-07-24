@@ -102,7 +102,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
-            <li class="nav-item"><a class="nav-link" href="../colaboradores/Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
+            <li class="nav-item"><a class="nav-link" href="Asignaciones.php"><i class="fa fa-users"></i> Asignaciones</a></li>
             <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">

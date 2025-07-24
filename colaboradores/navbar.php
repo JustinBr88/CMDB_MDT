@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <title>MD Tecnología</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <!-- Favicon -->
-  <link href="/img/favicon.ico" rel="icon" />
+  <link href="../img/favicon.ico" rel="icon" />
   <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
@@ -22,7 +22,9 @@ if (session_status() === PHP_SESSION_NONE) {
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
   <style>
     .profile-pic-navbar-lg {
       width: 80px;
@@ -55,8 +57,8 @@ if (session_status() === PHP_SESSION_NONE) {
   <header>
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex" style="margin-right: 0px">
       <div class="col-lg-4">
-        <a href="/Home.php" class="text-decoration-none">
-          <img src="/img/logo.png" alt="logo" />
+        <a href="../Usuario/Home.php" class="text-decoration-none">
+          <img src="../img/logo.png" alt="logo" />
         </a>
       </div>
       <div class="col-lg-4 col-6 text-left">
@@ -79,7 +81,7 @@ if (session_status() === PHP_SESSION_NONE) {
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
                 $foto = $_SESSION['foto'];
             } else {
-                $foto = '/img/default_profile.png';
+                $foto = '../img/default_profile.png';
             }
             // Nombre del usuario, si está logueado
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
@@ -106,10 +108,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Equipo/Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
-            <li class="nav-item"><a class="nav-link" href="/colaboradores/Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
-            <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link" href="InventarioColab.php"><i class="fa fa-boxes"></i> Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" href="SolicitudesColab.php"><i class="fa fa-list"></i> Solicitudes</a></li>
+            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
@@ -121,7 +122,7 @@ if (session_status() === PHP_SESSION_NONE) {
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link text-primary font-weight-bold" href="/Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+                <a class="nav-link text-primary font-weight-bold" href="../Usuario/Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
               </li>
             <?php endif; ?>
           </ul>

@@ -134,5 +134,17 @@ class Conexion {
         $stmt->close();
         return $historial;
     }
+
+    public function obtenerInventarioDisponible() {
+    $sql = "SELECT i.*, c.nombre as categoria FROM inventario i
+            LEFT JOIN categorias c ON i.categoria_id = c.id
+            WHERE i.estado IN ('activo', 'inventario')";
+    $result = $this->getConexion()->query($sql);
+    $inventario = [];
+    while ($row = $result->fetch_assoc()) {
+        $inventario[] = $row;
     }
+    return $inventario;
+    }
+}
 ?>

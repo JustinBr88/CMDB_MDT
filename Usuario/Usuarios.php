@@ -1,4 +1,3 @@
-<?php include('loginSesion.php'); ?>
 <?php include('navbar.php'); ?>
 <div class="container mt-5">
     <h2>Usuarios del Sistema</h2>

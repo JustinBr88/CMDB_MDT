@@ -151,5 +151,4 @@ VALUES ('Ana García', 'admin@midominio.com', 'admin123', 'admin', 1);
 -- (Opcional) Si quieres registrar a Ana como colaboradora también (por ejemplo, si los admins pueden ser colaboradores)
 INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
 VALUES ('Ana', 'García', 'A654321', 'ana.jpg', 'Calle 2 #456', 'Oficina B', '5559876543', 'admin@midominio.com', 1, 1);
-
 COMMIT;

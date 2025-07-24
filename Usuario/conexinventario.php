@@ -37,6 +37,7 @@ if ($_GET['action'] === 'update') {
         $errores[] = 'La fecha de ingreso debe tener formato AAAA-MM-DD.';
     }
     
+    // Restricción: no permitir editar a "solicitado" o "asignado" (solo si el valor original es uno de estos, bloquea desde JS)
     $estados_validos = ['activo', 'baja', 'reparacion', 'descarte', 'donado', 'inventario', 'solicitado', 'asignado'];
     if (isset($data['estado']) && !in_array($data['estado'], $estados_validos)) {
         $errores[] = 'El estado seleccionado no es válido.';
@@ -93,28 +94,15 @@ if ($_GET['action'] === 'delete') {
 if ($_GET['action'] === 'alta') {
     $errores = [];
     
-    // Debug: mostrar todos los datos recibidos
-    error_log("=== DEBUG ALTA ===");
-    error_log("REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD']);
-    error_log("CONTENT_TYPE: " . ($_SERVER['CONTENT_TYPE'] ?? 'no definido'));
-    error_log("Datos POST recibidos: " . print_r($_POST, true));
-    error_log("Datos FILES recibidos: " . print_r($_FILES, true));
-    
     // Validaciones para alta
     $nombre_equipo = trim($_POST['nombre_equipo'] ?? '');
-    error_log("Nombre equipo procesado: '" . $nombre_equipo . "' (longitud: " . strlen($nombre_equipo) . ")");
-    
     if (strlen($nombre_equipo) < 2) {
         $errores[] = 'El nombre del equipo es obligatorio y debe tener al menos 2 caracteres.';
-        error_log("Error: Nombre muy corto - longitud: " . strlen($nombre_equipo));
     }
     
     $categoria_id = $_POST['categoria_id'] ?? '';
-    error_log("Categoria ID procesada: '" . $categoria_id . "'");
-    
     if (empty($categoria_id) || $categoria_id === '' || $categoria_id === '0') {
         $errores[] = 'La categoría es obligatoria.';
-        error_log("Error: Categoría vacía");
     } else {
         // Validar que la categoría existe
         $catStmt = $conexion->getConexion()->prepare("SELECT id FROM categorias WHERE id = ?");
@@ -123,7 +111,6 @@ if ($_GET['action'] === 'alta') {
         $catStmt->store_result();
         if ($catStmt->num_rows === 0) {
             $errores[] = 'La categoría seleccionada no existe.';
-            error_log("Error: Categoría no existe en BD");
         }
         $catStmt->close();
     }
@@ -144,15 +131,10 @@ if ($_GET['action'] === 'alta') {
     }
     
     $estado = $_POST['estado'] ?? '';
-    $estados_validos = ['activo', 'baja', 'reparacion', 'descarte', 'donado', 'inventario', 'solicitado', 'asignado'];
+    // En el ALTA: (no permitas solicitado/asignado)
+    $estados_validos = ['activo', 'baja', 'reparacion', 'descarte', 'donado', 'inventario'];
     if (!empty($estado) && !in_array($estado, $estados_validos)) {
         $errores[] = 'El estado seleccionado no es válido.';
-    }
-    
-    // Si hay errores, devolver error
-    if ($errores) {
-        echo json_encode(['success'=>false, 'error'=>implode("\n", $errores)]);
-        exit;
     }
     
     // Proceder con la inserción
@@ -162,13 +144,31 @@ if ($_GET['action'] === 'alta') {
 
     $imagen = "";
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
-        $target_dir = "../uploads/";
-        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
-        $filename = uniqid() . "_" . basename($_FILES["imagen"]["name"]);
-        $target_file = $target_dir . $filename;
-        if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)) {
-            $imagen = $filename;
+        // VALIDACIÓN DE DIMENSIONES
+        $img_info = getimagesize($_FILES['imagen']['tmp_name']);
+        if ($img_info) {
+            $ancho = $img_info[0];
+            $alto = $img_info[1];
+            if ($ancho > 1800 || $alto > 1800) {
+                $errores[] = "La imagen es demasiado grande. El máximo permitido es 1800x1800 píxeles.";
+            }
         }
+        // Si no hay errores, procesa la imagen normalmente
+        if (empty($errores)) {
+            $target_dir = "../uploads/";
+            if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+            $filename = uniqid() . "_" . basename($_FILES["imagen"]["name"]);
+            $target_file = $target_dir . $filename;
+            if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)) {
+                $imagen = $filename;
+            }
+        }
+    }
+
+    // Si hay errores, devolver error
+    if ($errores) {
+        echo json_encode(['success'=>false, 'error'=>implode("\n", $errores)]);
+        exit;
     }
 
     $stmt = $conexion->getConexion()->prepare(

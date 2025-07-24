@@ -8,7 +8,11 @@ $result = $conexion->obtenerInventario();
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Inventario - Equipos y Software</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">Añadir Nuevo</button>
+         <div>
+            <a href="Solicitudes.php" class="btn btn-success me-2">Solicitudes</a>
+            <a href="Asignaciones.php" class="btn btn-primary me-2">Asignaciones</a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevo">Añadir Nuevo</button>
+        </div>
     </div>
     <!-- Tabla de Inventario -->
     <table class="table table-bordered table-striped mt-4" id="tabla-inventario">
@@ -117,8 +121,6 @@ $result = $conexion->obtenerInventario();
                         <option value="descarte">En descarte</option>
                         <option value="donado">Donado</option>
                         <option value="inventario">Inventario</option>
-                        <option value="solicitado">Solicitado</option>
-                        <option value="asignado">Asignado</option>
                     </select>
                 </div>
                 <div class="mb-3">
