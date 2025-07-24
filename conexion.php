@@ -1,8 +1,8 @@
 <?php
 class Conexion {
     private $servername = "localhost";
-    private $username = "labo2fa";
-    private $password = "GoLoNdRiNa56(/)";
+    private $username = "root";
+    private $password = "1234";
     private $dbname = "cmdb";
     private $conn;
 
@@ -34,7 +34,7 @@ class Conexion {
 
     // Validación de colaborador por correo o usuario
     public function validarColaborador($usuario_correo, $contrasena) {
-        $stmt = $this->conn->prepare("SELECT * FROM colaboradores WHERE (usuario = ? OR correo = ?) AND activo = 1");
+        $stmt = $this->conn->prepare("SELECT * FROM colaboradores WHERE (nombre = ? OR correo = ?) AND activo = 1");
         $stmt->bind_param("ss", $usuario_correo, $usuario_correo);
         $stmt->execute();
         $result = $stmt->get_result();
