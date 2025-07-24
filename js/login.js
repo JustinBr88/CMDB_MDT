@@ -8,17 +8,29 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     formData.append('contrasena', contrasena);
 
     try {
-        const response = await fetch('validar_login.php', {
+        // Volver al archivo original
+        const url = '/TheReturnofMDT/validar_login.php';
+        console.log('Enviando a archivo validar_login:', url);
+
+        const response = await fetch(url, {
             method: 'POST',
             body: formData
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const text = await response.text();
         console.log('Respuesta cruda:', text);
         const result = JSON.parse(text);
 
         if (result.success) {
             alert(result.mensaje);
-            window.location.href = 'home.php';
+            window.location.href = 'Home.php'; // Redirigir a Home.php en la misma carpeta Usuario/
         } else {
             alert(result.mensaje);
         }

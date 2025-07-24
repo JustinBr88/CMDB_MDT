@@ -74,7 +74,7 @@ if (session_status() === PHP_SESSION_NONE) {
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
                 $foto = $_SESSION['foto'];
             } else {
-                $foto = '../img/default_profile.png';
+                $foto = '../img/perfil.jpg';
             }
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
                 $nombreUsuario = htmlspecialchars($_SESSION['usuario']);

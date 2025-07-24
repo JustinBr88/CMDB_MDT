@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include(__DIR__ . '/../navbar.php'); ?>
+<?php include(__DIR__ . '/navbar.php'); ?>
 
 <!-- Breadcrumb Start -->
 <div class="container-fluid">
@@ -56,4 +56,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<?php include(__DIR__ . '/../footer.php'); ?>
+<?php include(__DIR__ . '/footer.php'); ?>

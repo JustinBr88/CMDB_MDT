@@ -14,7 +14,7 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Scripts generales -->
-  <script src="../js/main.js"></script>
+  <script type="module" src="../js/main.js"></script>
   <script src="../js/colaboradores.js"></script>
   <!-- Puedes incluir aquí otros scripts globales -->
 </body>
