@@ -2,16 +2,48 @@
 class Conexion {
     private $servername = "localhost";
     private $username = "root";
-    private $password = "1234";
+    private $password = "12345";
     private $dbname = "cmdb";
+    private $port = 3306;
     private $conn;
 
     public function __construct() {
-        $this->conn = new mysqli($this->servername, $this->username, $this->password, $this->dbname);
-        if ($this->conn->connect_error) {
-            die("Conexión fallida: " . $this->conn->connect_error);
+        try {
+            // Opción 1: Conexión con configuración específica para WAMP
+            $this->conn = new mysqli($this->servername, $this->username, $this->password, $this->dbname, $this->port);
+            
+            if ($this->conn->connect_error) {
+                throw new Exception("Error de conexión: " . $this->conn->connect_error);
+            }
+            
+            $this->conn->set_charset("utf8mb4");
+            
+        } catch (Exception $e) {
+            // Opción 2: Intentar con 127.0.0.1 en lugar de localhost
+            try {
+                $this->conn = new mysqli("127.0.0.1", $this->username, $this->password, $this->dbname, $this->port);
+                if ($this->conn->connect_error) {
+                    throw new Exception("Error de conexión: " . $this->conn->connect_error);
+                }
+                $this->conn->set_charset("utf8mb4");
+                
+            } catch (Exception $e2) {
+                // Opción 3: Intentar con socket local (para WAMP)
+                try {
+                    $this->conn = new mysqli("localhost:/tmp/mysql.sock", $this->username, $this->password, $this->dbname);
+                    if ($this->conn->connect_error) {
+                        throw new Exception("Error de conexión: " . $this->conn->connect_error);
+                    }
+                    $this->conn->set_charset("utf8mb4");
+                } catch (Exception $e3) {
+                    die("No se pudo establecer conexión a la base de datos. Posibles soluciones:<br>
+                         1. Verifique que MySQL esté ejecutándose en WAMP<br>
+                         2. Verifique que la contraseña del usuario root sea '1234'<br>
+                         3. En phpMyAdmin, cambie el plugin de autenticación del usuario root a 'mysql_native_password'<br>
+                         Error: " . $e3->getMessage());
+                }
+            }
         }
-        $this->conn->set_charset("utf8mb4");
     }
 
     public function getConexion() {
@@ -145,6 +177,75 @@ class Conexion {
         $inventario[] = $row;
     }
     return $inventario;
+    }
+
+    // Métodos CRUD para Categorías
+    
+    // Insertar nueva categoría
+    public function insertarCategoria($nombre, $descripcion) {
+        $stmt = $this->conn->prepare("INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)");
+        $stmt->bind_param("ss", $nombre, $descripcion);
+        $resultado = $stmt->execute();
+        $stmt->close();
+        return $resultado;
+    }
+
+    // Actualizar categoría
+    public function actualizarCategoria($id, $nombre, $descripcion) {
+        $stmt = $this->conn->prepare("UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $nombre, $descripcion, $id);
+        $resultado = $stmt->execute();
+        $stmt->close();
+        return $resultado;
+    }
+
+    // Eliminar categoría
+    public function eliminarCategoria($id) {
+        // Verificar si la categoría está siendo usada en inventario
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM inventario WHERE categoria_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($row['count'] > 0) {
+            return false; // No se puede eliminar porque está en uso
+        }
+        
+        $stmt = $this->conn->prepare("DELETE FROM categorias WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $resultado = $stmt->execute();
+        $stmt->close();
+        return $resultado;
+    }
+
+    // Obtener categoría por ID
+    public function obtenerCategoriaPorId($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM categorias WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $categoria = $result->fetch_assoc();
+        $stmt->close();
+        return $categoria;
+    }
+
+    // Verificar si el usuario es administrador
+    public function esAdministrador($usuario_id) {
+        $stmt = $this->conn->prepare("SELECT rol FROM usuarios WHERE id = ?");
+        $stmt->bind_param("i", $usuario_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $usuario = $result->fetch_assoc();
+        $stmt->close();
+        
+        // Debug temporal
+        error_log("DEBUG esAdministrador - Usuario ID: $usuario_id");
+        error_log("DEBUG esAdministrador - Usuario encontrado: " . print_r($usuario, true));
+        error_log("DEBUG esAdministrador - Rol: " . ($usuario ? $usuario['rol'] : 'NULL'));
+        
+        return $usuario && $usuario['rol'] === 'admin';
     }
 }
 ?>
