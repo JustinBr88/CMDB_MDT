@@ -8,13 +8,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     formData.append('contrasena', contrasena);
 
     try {
-        // Volver al archivo original
-        const url = '/TheReturnofMDT/validar_login.php';
-        console.log('Enviando a archivo validar_login:', url);
+        // Usar URL completa hacia WAMP desde cualquier puerto
+        const url = 'http://localhost/TheReturnofMDT/validar_login.php';
+        console.log('Enviando a WAMP:', url);
 
         const response = await fetch(url, {
             method: 'POST',
-            body: formData
+            body: formData,
+            mode: 'cors', // Permitir CORS
+            credentials: 'same-origin'
         });
         
         console.log('Response status:', response.status);
@@ -26,16 +28,34 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         const text = await response.text();
         console.log('Respuesta cruda:', text);
-        const result = JSON.parse(text);
+        
+        // Verificar si la respuesta es JSON válida
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseError) {
+            console.error('Error parsing JSON:', parseError);
+            console.error('Respuesta recibida:', text);
+            alert('Error: Respuesta del servidor no es JSON válida');
+            return;
+        }
 
         if (result.success) {
             alert(result.mensaje);
-            window.location.href = 'Home.php'; // Redirigir a Home.php en la misma carpeta Usuario/
+            // Redirigir a WAMP después del login exitoso
+            window.location.href = 'http://localhost/TheReturnofMDT/Usuario/Home.php';
         } else {
             alert(result.mensaje);
         }
     } catch (error) {
         console.error('Error en login:', error);
-        alert('Error de conexión o respuesta inválida del servidor.');
+        console.error('Tipo de error:', error.name);
+        console.error('Mensaje:', error.message);
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            alert('Error de conexión: No se puede conectar al servidor WAMP. Verifica que WAMP esté ejecutándose.');
+        } else {
+            alert(`Error de conexión: ${error.message}`);
+        }
     }
 });

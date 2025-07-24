@@ -1,8 +1,16 @@
 <?php
-// Configurar headers para JSON
+// Configurar headers para JSON y CORS
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 ini_set('display_errors', 0); // No mostrar errores en output
 error_reporting(E_ALL);
+
+// Manejar preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
 try {
     require_once 'conexion.php';

@@ -127,4 +127,4 @@ $result = $conexion->getConexion()->query($sql);
 
 <?php include('footer.php'); ?>
 
-<script src=".../js/adminSoli.js"></script>
+<script src="../js/adminSoli.js"></script>

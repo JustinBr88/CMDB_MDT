@@ -113,4 +113,4 @@ $result = $conexion->getConexion()->query($sql);
 
 <?php include('footer.php'); ?>
 
-<script src="js/retirarequipo.js"></script>
+<script src="../js/retirarequipo.js"></script>

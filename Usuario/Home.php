@@ -132,7 +132,6 @@
 <?php include('footer.php'); ?>
 
     <!-- JavaScript  -->
-    <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/home.js"></script>
+    <script src="../js/home.js"></script>
   </body>
 </html>

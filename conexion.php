@@ -10,7 +10,7 @@ class Conexion {
     public function __construct() {
         try {
             // Opción 1: Conexión con configuración específica para WAMP
-            $this->conn = new mysqli($this->servername, $this->username, $this->password, $this->dbname, $this->port);
+            $this->conn = new mysqli($this->servername, $this->username, $this->password, $this->dbname);
             
             if ($this->conn->connect_error) {
                 throw new Exception("Error de conexión: " . $this->conn->connect_error);

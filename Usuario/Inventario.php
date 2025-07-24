@@ -36,11 +36,8 @@ $result = $conexion->obtenerInventario();
             <?php foreach ($result as $row): ?>
             <tr data-id="<?= htmlspecialchars($row['id']) ?>">
                 <td>
-                    <?php if (!empty($row['imagen'])): ?>
-                        <img src='../uploads/<?= htmlspecialchars($row['imagen']) ?>' width='60' alt='Imagen equipo'>
-                    <?php else: ?>
-                        <img src='../img/equipo.jpg' width='60' alt='Imagen por defecto'>
-                    <?php endif; ?>
+                    <!-- Usar imagen por defecto para todos los equipos -->
+                    <img src='../img/perfil.jpg' width='60' alt='Imagen equipo'>
                 </td>
                 <td><?= htmlspecialchars($row['id']) ?></td>
                 <td class="editable" data-campo="nombre_equipo"><?= htmlspecialchars($row['nombre_equipo']) ?></td>

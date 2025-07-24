@@ -52,4 +52,4 @@
 <!-- Login End -->
 <?php include('footer.php'); ?>
 <!-- JavaScript -->
-<script type="module" src="../js/login.js"></script>
+<script src="../js/login.js"></script>
