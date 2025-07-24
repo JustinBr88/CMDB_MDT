@@ -34,15 +34,15 @@ $result = $conexion->obtenerInventario();
         </thead>
         <tbody>
             <?php foreach ($result as $row): ?>
-            <tr data-id="<?= $row['id'] ?>">
+            <tr data-id="<?= htmlspecialchars($row['id']) ?>">
                 <td>
                     <?php if (!empty($row['imagen'])): ?>
-                        <img src='../uploads/<?= $row['imagen'] ?>' width='60'>
+                        <img src='../uploads/<?= htmlspecialchars($row['imagen']) ?>' width='60' alt='Imagen equipo'>
                     <?php else: ?>
-                        <img src='../img/equipo.jpg' width='60'>
+                        <img src='../img/equipo.jpg' width='60' alt='Imagen por defecto'>
                     <?php endif; ?>
                 </td>
-                <td><?= $row['id'] ?></td>
+                <td><?= htmlspecialchars($row['id']) ?></td>
                 <td class="editable" data-campo="nombre_equipo"><?= htmlspecialchars($row['nombre_equipo']) ?></td>
                 <td class="editable" data-campo="categoria_id"><?= htmlspecialchars($row['categoria']) ?></td>
                 <td class="editable" data-campo="marca"><?= htmlspecialchars($row['marca']) ?></td>
@@ -74,7 +74,7 @@ $result = $conexion->obtenerInventario();
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="nombre_equipo" class="form-label">Nombre del equipo *</label>
-                    <input type="text" name="nombre_equipo" id="nombre_equipo" class="form-control" required>
+                    <input type="text" name="nombre_equipo" id="nombre_equipo" class="form-control" required maxlength="100">
                 </div>
                 <div class="mb-3">
                     <label for="categoria_id" class="form-label">Categoría *</label>
@@ -83,49 +83,51 @@ $result = $conexion->obtenerInventario();
                         <?php
                         $categorias = $conexion->obtenerCategorias();
                         foreach ($categorias as $cat) {
-                            echo "<option value='{$cat['id']}'>{$cat['nombre']}</option>";
+                            echo "<option value='" . htmlspecialchars($cat['id']) . "'>" . htmlspecialchars($cat['nombre']) . "</option>";
                         }
                         ?>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="marca" class="form-label">Marca</label>
-                    <input type="text" name="marca" id="marca" class="form-control">
+                    <input type="text" name="marca" id="marca" class="form-control" maxlength="50">
                 </div>
                 <div class="mb-3">
                     <label for="modelo" class="form-label">Modelo</label>
-                    <input type="text" name="modelo" id="modelo" class="form-control">
+                    <input type="text" name="modelo" id="modelo" class="form-control" maxlength="50">
                 </div>
                 <div class="mb-3">
                     <label for="numero_serie" class="form-label">Número de Serie</label>
-                    <input type="text" name="numero_serie" id="numero_serie" class="form-control">
+                    <input type="text" name="numero_serie" id="numero_serie" class="form-control" maxlength="50">
                 </div>
                 <div class="mb-3">
                     <label for="costo" class="form-label">Costo</label>
-                    <input type="number" step="0.01" name="costo" id="costo" class="form-control">
+                    <input type="number" step="0.01" name="costo" id="costo" class="form-control" min="0" max="999999.99">
                 </div>
                 <div class="mb-3">
                     <label for="fecha_ingreso" class="form-label">Fecha de ingreso</label>
-                    <input type="date" name="fecha_ingreso" id="fecha_ingreso" class="form-control">
+                    <input type="date" name="fecha_ingreso" id="fecha_ingreso" class="form-control" max="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="mb-3">
                     <label for="tiempo_depreciacion" class="form-label">Tiempo de depreciación (meses)</label>
-                    <input type="number" name="tiempo_depreciacion" id="tiempo_depreciacion" class="form-control">
+                    <input type="number" name="tiempo_depreciacion" id="tiempo_depreciacion" class="form-control" min="0" max="120">
                 </div>
                 <div class="mb-3">
                     <label for="estado" class="form-label">Estado</label>
                     <select name="estado" id="estado" class="form-control">
                         <option value="activo">Activo</option>
                         <option value="baja">Baja</option>
-                        <option value="reparacion">En reparación</option>
-                        <option value="descarte">En descarte</option>
-                        <option value="donado">Donado</option>
                         <option value="inventario">Inventario</option>
+                        <option value="reparacion">Reparación</option>
+                        <option value="descarte">Descarte</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="imagen" class="form-label">Imagen del equipo/software</label>
-                    <input type="file" name="imagen" id="imagen" class="form-control" accept="image/*">
+                    <input type="file" name="imagen" id="imagen" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif" maxlength="5242880">
+                    <div class="form-text">
+                        <small>Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -138,6 +140,56 @@ $result = $conexion->obtenerInventario();
 
 <?php include('../modelos.php'); ?>
 
+<!-- Scripts sanitizados -->
 <script src="../js/modales.js"></script>
 <script src="../js/botonEditar_Guardar.js"></script>
+
+<!-- Script adicional para validación de formularios -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación adicional en el cliente
+    const formNuevo = document.getElementById('formNuevo');
+    const imagenInput = document.getElementById('imagen');
+    
+    // Validar archivo de imagen
+    imagenInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Validar tamaño (5MB máximo)
+            if (file.size > 5242880) {
+                alert('El archivo es demasiado grande. Máximo 5MB.');
+                this.value = '';
+                return;
+            }
+            
+            // Validar tipo de archivo
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Tipo de archivo no permitido. Solo JPG, PNG y GIF.');
+                this.value = '';
+                return;
+            }
+        }
+    });
+    
+    // Sanitizar inputs de texto en tiempo real
+    const textInputs = formNuevo.querySelectorAll('input[type="text"]');
+    textInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // Remover caracteres potencialmente peligrosos
+            this.value = this.value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+            this.value = this.value.replace(/[<>]/g, '');
+        });
+    });
+    
+    // Validar números
+    const numberInputs = formNuevo.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value < 0) this.value = 0;
+        });
+    });
+});
+</script>
+
 <?php include('footer.php'); ?>

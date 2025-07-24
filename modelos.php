@@ -78,3 +78,19 @@
     </div>
   </div>
 </div>
+
+<!-- Modal para mostrar QR -->
+<div class="modal fade" id="modalQr" tabindex="-1" aria-labelledby="modalQrLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Código QR del Equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrContainer"></div>
+                <p id="qrEquipoDatos" class="mt-3 text-start"></p>
+            </div>
+        </div>
+    </div>
+</div>

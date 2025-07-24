@@ -19,6 +19,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Botón editar clickeado');
             const tr = e.target.closest('tr');
             
+            // NUEVA VALIDACIÓN: Verificar el estado del equipo
+            const estadoCell = tr.querySelector('.editable[data-campo="estado"]');
+            const estadoActual = estadoCell.textContent.trim().toLowerCase();
+            
+            // Bloquear edición si está en estado "donado" o "solicitado"
+            if (estadoActual === 'donado' || estadoActual === 'solicitado') {
+                mostrarErrores(`No se puede editar un equipo en estado "${estadoActual}"`);
+                return;
+            }
+            
             tr.querySelectorAll('.editable').forEach(function (td) {
                 const valor = td.textContent.trim();
                 const campo = td.getAttribute('data-campo');
@@ -40,17 +50,17 @@ document.addEventListener('DOMContentLoaded', function () {
                             td.innerHTML = `<input type="text" class="form-control" value="${valor}">`;
                         });
                 } else if (campo === 'estado') {
-                    // Para el estado, crear select pero bloquear si ya está en "solicitado" o "asignado"
+                    // Para el estado, crear select pero bloquear ciertos estados
                     const estados = [
                         {value: 'activo', text: 'Activo'},
                         {value: 'baja', text: 'Baja'},
                         {value: 'reparacion', text: 'En reparación'},
                         {value: 'descarte', text: 'En descarte'},
-                        {value: 'donado', text: 'Donado'},
                         {value: 'inventario', text: 'Inventario'},
                     ];
                     let selectHtml = '<select class="form-control" data-campo="estado"';
-                    if (valor === "solicitado" || valor === "asignado") {
+                    // Deshabilitar si está en estados protegidos
+                    if (valor.toLowerCase() === "solicitado" || valor.toLowerCase() === "asignado" || valor.toLowerCase() === "donado") {
                         selectHtml += ' disabled';
                     }
                     selectHtml += '>';
@@ -93,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (["activo","baja","reparacion","descarte","donado","inventario"].includes(select.value)) {
                             datos[campo] = select.value;
                         } else {
-                            mostrarErrores('No se puede seleccionar "solicitado" o "asignado" desde la edición.');
+                            mostrarErrores('No se puede seleccionar estados protegidos desde la edición.');
                             return;
                         }
                     }
@@ -134,6 +144,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Botón eliminar clickeado');
             const tr = e.target.closest('tr');
             const id = tr.getAttribute('data-id');
+            
+            // NUEVA VALIDACIÓN: Verificar el estado antes de eliminar
+            const estadoCell = tr.querySelector('.editable[data-campo="estado"]');
+            const estadoActual = estadoCell.textContent.trim().toLowerCase();
+            
+            // Bloquear eliminación si está en estado "donado", "solicitado" o "asignado"
+            if (estadoActual === 'donado' || estadoActual === 'solicitado' || estadoActual === 'asignado') {
+                mostrarErrores(`No se puede eliminar un equipo en estado "${estadoActual}"`);
+                return;
+            }
             
             confirmarEliminar(() => {
                 fetch('conexinventario.php?action=delete', {

@@ -95,6 +95,21 @@ CREATE TABLE historial_accesos_colaborador (
     FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id) ON DELETE CASCADE
 );
 
+CREATE TABLE donaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  colaborador_id INT NOT NULL,
+  inventario_id INT NOT NULL,
+  destinatario VARCHAR(100) NOT NULL, -- institución o persona a quien se dona
+  motivo TEXT,                        -- motivo de la donación
+  fecha_donacion DATETIME NOT NULL,
+  estado VARCHAR(30) DEFAULT 'pendiente', -- pendiente, aprobada, rechazada
+  usuario_admin_id INT,                   -- quien aprueba/rechaza
+  fecha_respuesta DATETIME,
+  FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id),
+  FOREIGN KEY (inventario_id) REFERENCES inventario(id),
+  FOREIGN KEY (usuario_admin_id) REFERENCES usuarios(id)
+);
+
 -- Ejemplo de datos base
 INSERT INTO categorias (nombre, descripcion) VALUES
 ('Software', 'Programas informáticos'),
@@ -151,4 +166,11 @@ VALUES ('Ana García', 'admin@midominio.com', 'admin123', 'admin', 1);
 -- (Opcional) Si quieres registrar a Ana como colaboradora también (por ejemplo, si los admins pueden ser colaboradores)
 INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
 VALUES ('Ana', 'García', 'A654321', 'ana.jpg', 'Calle 2 #456', 'Oficina B', '5559876543', 'admin@midominio.com', 1, 1);
+ALTER TABLE solicitudes
+ADD COLUMN motivo TEXT AFTER estado,
+ADD COLUMN nombre_equipo VARCHAR(100) NOT NULL AFTER inventario_id;
+ALTER TABLE solicitudes
+ADD COLUMN tipo VARCHAR(30) DEFAULT 'asignacion' AFTER motivo;
+ALTER TABLE asignaciones
+ADD COLUMN motivo_retiro TEXT AFTER fecha_retiro;
 COMMIT;

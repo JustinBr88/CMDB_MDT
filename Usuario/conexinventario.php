@@ -149,8 +149,8 @@ if ($_GET['action'] === 'alta') {
         if ($img_info) {
             $ancho = $img_info[0];
             $alto = $img_info[1];
-            if ($ancho > 1800 || $alto > 1800) {
-                $errores[] = "La imagen es demasiado grande. El máximo permitido es 1800x1800 píxeles.";
+            if ($ancho > 2500 || $alto > 2500) {
+                $errores[] = "La imagen es demasiado grande. El máximo permitido es 2500x2500 píxeles.";
             }
         }
         // Si no hay errores, procesa la imagen normalmente

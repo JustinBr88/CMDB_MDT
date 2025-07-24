@@ -1,4 +1,4 @@
-import { BASE_URL, eventManager } from "./utils.js";
+const { BASE_URL, eventManager } = require("./utils.js");
 
 const categoriesContainer = document.getElementById("navbar-categorias");
 const typeFilterContainer = document.getElementById("type-filter-container");
