@@ -37,8 +37,19 @@ $result = $conexion->obtenerInventario();
             <?php foreach ($result as $row): ?>
             <tr data-id="<?= htmlspecialchars($row['id']) ?>">
                 <td>
-                    <!-- Usar imagen por defecto para todos los equipos -->
-                    <img src='../img/perfil.jpg' width='60' alt='Imagen equipo'>
+                    <?php
+                    // Verificar si existe imagen en la base de datos y el archivo existe
+                    $imagenPath = '../img/perfil.jpg'; // Imagen por defecto
+                    if (!empty($row['imagen'])) {
+                        $imagenEquipo = '../uploads/' . $row['imagen'];
+                        // Verificar si el archivo existe
+                        if (file_exists($imagenEquipo)) {
+                            $imagenPath = $imagenEquipo;
+                        }
+                    }
+                    ?>
+                    <img src='<?= htmlspecialchars($imagenPath) ?>' width='60' alt='Imagen equipo' class='img-thumbnail' 
+                         onerror="this.src='../img/perfil.jpg';" style="height: 60px; object-fit: cover;">
                 </td>
                 <td><?= htmlspecialchars($row['id']) ?></td>
                 <td class="editable" data-campo="nombre_equipo"><?= htmlspecialchars($row['nombre_equipo']) ?></td>
@@ -135,6 +146,9 @@ $result = $conexion->obtenerInventario();
         </form>
     </div>
 </div>
+
+<!-- Incluir modales requeridos -->
+<?php include('../modelos.php'); ?>
 
 <!-- Scripts sanitizados -->
 <script src="../js/modales.js"></script>
