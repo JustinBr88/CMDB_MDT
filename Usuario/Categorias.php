@@ -1,34 +1,24 @@
 <?php 
 include('loginSesion.php'); // Descomentado para verificar sesión
+include('../navbar_unificado.php');
 require_once('../conexion.php');
 
 $conexion = new Conexion();
 $mensaje = '';
 $tipo_mensaje = '';
 
-// Debug: Verifica datos de sesión
-echo "<!-- DEBUG INFO: 
-Session ID: " . (isset($_SESSION['id']) ? $_SESSION['id'] : 'NO SET') . "
-Session Rol: " . (isset($_SESSION['rol']) ? $_SESSION['rol'] : 'NO SET') . "
-Session Usuario: " . (isset($_SESSION['usuario']) ? $_SESSION['usuario'] : 'NO SET') . "
--->";
-
 // Verifica si el usuario es administrador
 $es_admin = false;
 
-// Método 1: Verificar por sesión directamente (más rápido)
+// Verificar por sesión directamente
 if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') {
     $es_admin = true;
-    echo "<!-- Admin verificado por sesión -->";
 }
 
-// Método 2: Verificar por base de datos (backup)
+// Método de respaldo: Verificar por base de datos
 if (!$es_admin && isset($_SESSION['id'])) {
     $es_admin = $conexion->esAdministrador($_SESSION['id']);
-    echo "<!-- Admin verificado por BD: " . ($es_admin ? 'TRUE' : 'FALSE') . " -->";
 }
-
-echo "<!-- Resultado final es_admin: " . ($es_admin ? 'TRUE' : 'FALSE') . " -->";
 
 // Procesar acciones CRUD solo si es administrador
 if ($es_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -76,8 +66,6 @@ if ($es_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-include('navbar.php');
 ?>
 
 <div class="container mt-5">

@@ -1,5 +1,5 @@
-<?php include 'loginSesion.php';
-      include('navbar.php'); ?>
+<?php include 'loginSesionColaborador.php';
+      include('../navbar_unificado.php'); ?>
 
     <!-- Carousel Start -->
     <div class="container-fluid mb-3">

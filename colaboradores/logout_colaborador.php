@@ -10,6 +10,6 @@ unset($_SESSION['colaborador_foto']);
 // session_destroy();
 
 // Redirige al login de colaborador
-header('Location: LoginColaborador.php');
+header('Location: ../Usuario/Login.php');
 exit;
 ?>

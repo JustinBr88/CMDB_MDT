@@ -1,4 +1,4 @@
-<?php include('navbar.php'); ?>
+<?php include('../navbar_unificado.php'); ?>
 <div class="container mt-5">
     <h2>Usuarios del Sistema</h2>
     <!-- Formulario de Alta -->
@@ -46,7 +46,7 @@
         </thead>
         <tbody>
             <?php
-            require_once('conexion.php');
+            require_once('../conexion.php');
             $conexion = new Conexion();
             $result = $conexion->obtenerUsuarios();
             foreach ($result as $row) {

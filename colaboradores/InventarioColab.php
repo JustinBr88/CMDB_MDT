@@ -1,6 +1,6 @@
 <?php 
 require_once '../vendor/autoload.php';
-include('navbar.php'); 
+include('../navbar_unificado.php'); 
 ?>
 <div class="container mt-5">
     <h2>Inventario disponible para solicitud</h2>

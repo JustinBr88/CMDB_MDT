@@ -1,6 +1,6 @@
 <?php 
 include 'loginSesion.php';
-include('navbar.php'); 
+include('../navbar_unificado.php'); 
 require_once '../conexion.php';
 
 try {

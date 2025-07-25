@@ -110,15 +110,23 @@ if (session_status() === PHP_SESSION_NONE) {
             <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="InventarioColab.php"><i class="fa fa-boxes"></i> Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="SolicitudesColab.php"><i class="fa fa-list"></i> Solicitudes</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-heart"></i> Donaciones
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
+              </ul>
+            </li>
             <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
-            <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
+            <?php if(isset($_SESSION['colaborador_logeado']) && $_SESSION['colaborador_logeado'] === true): ?>
               <li class="nav-item">
-                <a class="nav-link text-light" href="Usuario/Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+                <a class="nav-link text-light" href="PerfilColab.php"><i class="fa fa-user"></i> Perfil</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-danger font-weight-bold" href="/logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+                <a class="nav-link text-danger font-weight-bold" href="logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
               </li>
             <?php else: ?>
               <li class="nav-item">

@@ -42,8 +42,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
         if (result.success) {
             alert(result.mensaje);
-            // Redirigir a WAMP después del login exitoso
-            window.location.href = 'http://localhost/TheReturnofMDT/Usuario/Home.php';
+            // Redirigir según el tipo de usuario
+            if (result.redirect) {
+                window.location.href = `http://localhost/TheReturnofMDT/${result.redirect}`;
+            } else {
+                // Fallback por tipo
+                if (result.tipo === 'colaborador') {
+                    window.location.href = 'http://localhost/TheReturnofMDT/colaboradores/portal_colaborador.php';
+                } else {
+                    window.location.href = 'http://localhost/TheReturnofMDT/Usuario/Home.php';
+                }
+            }
         } else {
             alert(result.mensaje);
         }

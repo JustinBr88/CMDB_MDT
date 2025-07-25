@@ -123,7 +123,15 @@ if (session_status() === PHP_SESSION_NONE) {
             <li class="nav-item"><a class="nav-link" href="Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
             <li class="nav-item"><a class="nav-link" href="Asignaciones.php"><i class="fa fa-users"></i> Asignaciones</a></li>
-            <li class="nav-item"><a class="nav-link" href="Descarte.php"><i class="fa fa-trash-alt"></i> Descartes</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="gestionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i> Gestión
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="gestionDropdown">
+                <li><a class="dropdown-item" href="Descarte.php"><i class="fa fa-trash-alt"></i> Descartes</a></li>
+                <li><a class="dropdown-item" href="gestionar_donaciones.php"><i class="fa fa-heart"></i> Gestionar Donaciones</a></li>
+              </ul>
+            </li>
             <li class="nav-item"><a class="nav-link" href="Reportes.php"><i class="fa fa-chart-bar"></i> Reportes</a></li>
             <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
           </ul>
@@ -144,7 +152,7 @@ if (session_status() === PHP_SESSION_NONE) {
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link text-primary font-weight-bold" href="../Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+                <a class="nav-link text-primary font-weight-bold" href="Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
               </li>
             <?php endif; ?>
           </ul>

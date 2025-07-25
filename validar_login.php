@@ -37,13 +37,27 @@ try {
 
             if ($user) {
                 session_start();
+                // Limpiar cualquier sesión de colaborador anterior
+                unset($_SESSION['colaborador_logeado']);
+                unset($_SESSION['colaborador_id']);
+                unset($_SESSION['colaborador_nombre']);
+                unset($_SESSION['colaborador_apellido']);
+                unset($_SESSION['colaborador_foto']);
+                unset($_SESSION['colaborador_usuario']);
+                
+                // Establecer variables de usuario/admin
                 $_SESSION['usuario'] = $user['nombre'];
                 $_SESSION['logeado'] = true;
                 $_SESSION['rol'] = $user['rol'];
                 $_SESSION['id'] = $user['id']; // Agregar ID para verificación de roles
                 $_SESSION['foto'] = $user['foto'] ?? '';
                 $_SESSION['tipo'] = 'usuario';
-                echo json_encode(['success' => true, 'mensaje' => 'Login exitoso como usuario']);
+                echo json_encode([
+                    'success' => true, 
+                    'mensaje' => 'Login exitoso como usuario',
+                    'redirect' => 'Usuario/Home.php',
+                    'tipo' => 'usuario'
+                ]);
                 exit;
             }
         } catch (Exception $e) {
@@ -57,13 +71,27 @@ try {
 
             if ($colab) {
                 session_start();
-                $_SESSION['usuario'] = $colab['nombre'] . ' ' . $colab['apellido'];
-                $_SESSION['logeado'] = true;
-                $_SESSION['rol'] = 'colaborador';
-                $_SESSION['id'] = $colab['id']; // Agregar ID
-                $_SESSION['foto'] = $colab['foto'] ?? '';
-                $_SESSION['tipo'] = 'colaborador';
-                echo json_encode(['success' => true, 'mensaje' => 'Login exitoso como colaborador']);
+                // Limpiar cualquier sesión de usuario anterior
+                unset($_SESSION['logeado']);
+                unset($_SESSION['usuario']);
+                unset($_SESSION['rol']);
+                unset($_SESSION['id']);
+                unset($_SESSION['foto']);
+                unset($_SESSION['tipo']);
+                
+                // Establecer solo variables de colaborador
+                $_SESSION['colaborador_logeado'] = true;
+                $_SESSION['colaborador_id'] = $colab['id'];
+                $_SESSION['colaborador_nombre'] = $colab['nombre'];
+                $_SESSION['colaborador_apellido'] = $colab['apellido'];
+                $_SESSION['colaborador_foto'] = $colab['foto'] ?? '';
+                $_SESSION['colaborador_usuario'] = $colab['usuario'];
+                echo json_encode([
+                    'success' => true, 
+                    'mensaje' => 'Login exitoso como colaborador',
+                    'redirect' => 'colaboradores/portal_colaborador.php',
+                    'tipo' => 'colaboradores'
+                ]);
                 exit;
             }
         } catch (Exception $e) {

@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once('conexion.php');
+require_once('../conexion.php');
 
-if (!isset($_SESSION['colaborador_logeado']) || !$_SESSION['colaborador_id']) {
-    header('Location: LoginColaborador.php');
+if (!isset($_SESSION['colaborador_logeado']) || !$_SESSION['colaborador_logeado']) {
+    header('Location: ../Usuario/Login.php');
     exit;
 }
 

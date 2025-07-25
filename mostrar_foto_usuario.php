@@ -2,16 +2,21 @@
 session_start();
 require_once 'conexion.php';
 
-// Verificar que el usuario esté logueado
-if (!isset($_SESSION['id'])) {
-    // Mostrar imagen por defecto si no hay usuario logueado
-    $imagen_defecto = file_get_contents('img/perfil.jpg');
+// Permitir pasar el ID del usuario como parámetro para flexibilidad
+$usuario_id = null;
+if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $usuario_id = (int)$_GET['id'];
+} elseif (isset($_SESSION['id'])) {
+    $usuario_id = $_SESSION['id'];
+}
+
+if (!$usuario_id) {
+    // Mostrar imagen por defecto si no hay usuario
+    $imagen_defecto = file_get_contents('img/usuarios/default.jpg');
     header('Content-Type: image/jpeg');
     echo $imagen_defecto;
     exit;
 }
-
-$usuario_id = $_SESSION['id'];
 
 try {
     $conexion = new Conexion();
@@ -31,14 +36,14 @@ try {
         echo $usuario['foto'];
     } else {
         // Mostrar imagen por defecto si no tiene foto
-        $imagen_defecto = file_get_contents('img/perfil.jpg');
+        $imagen_defecto = file_get_contents('img/usuarios/default.jpg');
         header('Content-Type: image/jpeg');
         echo $imagen_defecto;
     }
     
 } catch (Exception $e) {
     // En caso de error, mostrar imagen por defecto
-    $imagen_defecto = file_get_contents('img/perfil.jpg');
+    $imagen_defecto = file_get_contents('img/usuarios/default.jpg');
     header('Content-Type: image/jpeg');
     echo $imagen_defecto;
 }

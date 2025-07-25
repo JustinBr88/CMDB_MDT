@@ -187,6 +187,32 @@ ADD COLUMN tipo VARCHAR(30) DEFAULT 'asignacion' AFTER motivo;
 ALTER TABLE asignaciones
 ADD COLUMN motivo_retiro TEXT AFTER fecha_retiro;
 
+-- Tabla para entregas de equipos por colaboradores
+CREATE TABLE entregas_colaborador (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  asignacion_id INT NOT NULL,
+  colaborador_id INT NOT NULL,
+  inventario_id INT NOT NULL,
+  motivo_entrega TEXT NOT NULL,
+  tipo_entrega ENUM('traslado','salida','mal_estado','reasignacion','otro') NOT NULL,
+  observaciones TEXT,
+  fecha_entrega DATETIME NOT NULL,
+  estado ENUM('pendiente_validacion','aprobada','rechazada') DEFAULT 'pendiente_validacion',
+  usuario_admin_id INT NULL, -- Usuario que valida la entrega
+  fecha_validacion DATETIME NULL,
+  observaciones_admin TEXT NULL,
+  FOREIGN KEY (asignacion_id) REFERENCES asignaciones(id),
+  FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id),
+  FOREIGN KEY (inventario_id) REFERENCES inventario(id),
+  FOREIGN KEY (usuario_admin_id) REFERENCES usuarios(id)
+);
+
+-- Actualizar enum de estados del inventario para incluir nuevos estados
+ALTER TABLE inventario MODIFY COLUMN estado ENUM('activo','baja','reparacion','descarte','donado','inventario','solicitado','asignado','entrega_pendiente','revision_tecnica','donacion_pendiente') DEFAULT 'activo';
+
+-- Actualizar enum de estados de asignaciones
+ALTER TABLE asignaciones MODIFY COLUMN estado ENUM('asignado','retirado','devuelto','entrega_pendiente','donado') DEFAULT 'asignado';
+
 -- Triggers para automatizar el manejo de descartes
 DELIMITER $$
 

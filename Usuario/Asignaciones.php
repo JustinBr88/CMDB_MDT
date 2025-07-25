@@ -1,5 +1,5 @@
 <?php 
-include('navbar.php'); 
+include('../navbar_unificado.php'); 
 include('../conexion.php');
 $conexion = new Conexion();
 

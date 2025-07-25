@@ -1,5 +1,6 @@
 <?php
 session_start();
+include '../navbar_unificado.php';
 require_once '../conexion.php';
 
 // Verificar sesión
@@ -30,8 +31,6 @@ try {
     echo "Error: " . $e->getMessage();
     exit();
 }
-
-include 'navbar.php';
 ?>
 
 <div class="container-fluid py-4">

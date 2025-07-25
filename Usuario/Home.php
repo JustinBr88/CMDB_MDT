@@ -1,5 +1,7 @@
-<?php include 'loginSesion.php';
-      include('navbar.php'); ?>
+<?php 
+include 'loginSesion.php';
+include('../navbar_unificado.php'); 
+?>
       
     <h1>Bienvenido Usuario al sistema CMDB de MDT</h1>
 

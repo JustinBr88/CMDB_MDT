@@ -1,6 +1,6 @@
 <?php 
 require_once '../vendor/autoload.php';
-include('navbar.php'); 
+include('../navbar_unificado.php'); 
 include('../conexion.php');
 $conexion = new Conexion();
 

@@ -1,5 +1,6 @@
-<?php
-include('navbar.php');
+<?php 
+include 'loginSesion.php';
+include('../navbar_unificado.php');
 require_once '../conexion.php';
 $conexion = new Conexion();
 $result = $conexion->obtenerInventario();
@@ -134,8 +135,6 @@ $result = $conexion->obtenerInventario();
         </form>
     </div>
 </div>
-
-<?php include('../modelos.php'); ?>
 
 <!-- Scripts sanitizados -->
 <script src="../js/modales.js"></script>

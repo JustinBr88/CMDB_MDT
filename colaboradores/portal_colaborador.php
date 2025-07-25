@@ -1,11 +1,13 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include 'loginSesionColaborador.php';
 require_once(__DIR__ . '/../conexion.php');
 
 // Validación de sesión colaborador
 if (!isset($_SESSION['colaborador_logeado']) || !$_SESSION['colaborador_logeado']) {
-    header('Location: LoginColaborador.php');
+    header('Location: ../Usuario/Login.php');
     exit;
 }
 $conexion = new Conexion();
@@ -67,7 +69,7 @@ if (isset($_SESSION['colab_pass_msg'])) {
     unset($_SESSION['colab_pass_msg']);
 }
 ?>
-<?php include(__DIR__ . '/../navbar.php'); ?>
+<?php include('../navbar_unificado.php'); ?>
 
 <!-- Breadcrumb Start -->
 <div class="container-fluid">
@@ -136,6 +138,11 @@ if (isset($_SESSION['colab_pass_msg'])) {
       </form>
 
       <h4>Mis Equipos Asignados</h4>
+      <div class="d-flex mb-3">
+        <a href="solicitar_donacion.php" class="btn btn-success">
+          <i class="fas fa-heart"></i> Solicitar Donación
+        </a>
+      </div>
       <div class="table-responsive mb-4">
         <table class="table table-bordered table-striped">
           <thead class="thead-dark">
@@ -203,7 +210,7 @@ if (isset($_SESSION['colab_pass_msg'])) {
           </thead>
           <tbody>
             <?php
-            $historial = $conexion->obtenerHistorialAccesosColaborador($colab['id'], 20);
+            $historial = $conexion->obtenerHistorialAccesosColaborador($colab['id']);
             if ($historial && count($historial) > 0) {
               foreach ($historial as $h) {
                 echo "<tr>
@@ -223,4 +230,4 @@ if (isset($_SESSION['colab_pass_msg'])) {
   </div>
 </div>
 
-<?php include(__DIR__ . '/../footer.php'); ?>
+<?php include('footer.php'); ?>

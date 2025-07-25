@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 $conexion = new Conexion();
 
 // Verificar que el usuario sea administrador
-if (!isset($_SESSION['admin_id'])) {
+if (!isset($_SESSION['logeado']) || $_SESSION['logeado'] !== true) {
     echo json_encode(['success' => false, 'error' => 'No tiene permisos de administrador.']);
     exit;
 }

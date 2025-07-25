@@ -1,6 +1,6 @@
 <?php 
 include 'loginSesionColaborador.php';
-include(__DIR__ . '/../navbar.php');
+include('../navbar_unificado.php');
 require_once(__DIR__ . '/../conexion.php');
 $conexion = new Conexion();
 
@@ -133,19 +133,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear'])) {
             foreach ($colaboradores as $row) {
                 echo "<tr>
                     <td>{$row['id']}</td>
-                    <td>" . htmlspecialchars($row['nombre']) . "</td>
-                    <td>" . htmlspecialchars($row['apellido']) . "</td>
-                    <td>" . htmlspecialchars($row['identificacion']) . "</td>
+                    <td>" . htmlspecialchars($row['nombre'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['apellido'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['identificacion'] ?? '') . "</td>
                     <td>".($row['foto'] ? "<img src='".htmlspecialchars($row['foto'])."' style='width:40px;'>" : "")."</td>
-                    <td>" . htmlspecialchars($row['direccion']) . "</td>
-                    <td>" . htmlspecialchars($row['ubicacion']) . "</td>
-                    <td>" . htmlspecialchars($row['telefono']) . "</td>
-                    <td>" . htmlspecialchars($row['correo']) . "</td>
-                    <td>" . htmlspecialchars($row['dep_nombre']) . "</td>
+                    <td>" . htmlspecialchars($row['direccion'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['ubicacion'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['telefono'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['correo'] ?? '') . "</td>
+                    <td>" . htmlspecialchars($row['departamento_nombre'] ?? 'Sin departamento') . "</td>
                 </tr>";
             }
             ?>
         </tbody>
     </table>
 </div>
-<?php include(__DIR__ . '/../footer.php'); ?>
+<?php include('footer.php'); ?>
