@@ -34,7 +34,8 @@ CREATE TABLE colaboradores (
   nombre VARCHAR(50) NOT NULL,
   apellido VARCHAR(50) NOT NULL,
   identificacion VARCHAR(50) NOT NULL UNIQUE,
-  foto VARCHAR(255),
+  foto LONGBLOB,
+  foto_tipo VARCHAR(50),
   direccion VARCHAR(150),
   ubicacion VARCHAR(100),
   telefono VARCHAR(20),
@@ -55,7 +56,7 @@ CREATE TABLE inventario (
   costo DECIMAL(10,2),
   fecha_ingreso DATE,
   tiempo_depreciacion INT, -- en meses
-  estado ENUM('activo','baja','reparacion','descarte','donado','inventario','solicitado','asignado') DEFAULT 'activo',
+  estado ENUM('activo','baja','reparacion','descarte','donado','inventario','solicitado','asignado','entrega_pendiente','revision_tecnica','donacion_pendiente') DEFAULT 'activo',
   descripcion TEXT,
   imagen VARCHAR(255), -- Ruta o nombre de archivo de la imagen
   -- Campos para sistema de descarte
@@ -71,9 +72,12 @@ CREATE TABLE inventario (
 CREATE TABLE solicitudes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   inventario_id INT NOT NULL, -- El equipo/software solicitado
+  nombre_equipo VARCHAR(100) NOT NULL,
   colaborador_id INT NOT NULL, -- Quién solicita
   fecha_solicitud DATETIME DEFAULT CURRENT_TIMESTAMP,
   estado ENUM('pendiente','aceptada','rechazada') DEFAULT 'pendiente',
+  motivo TEXT,
+  tipo VARCHAR(30) DEFAULT 'asignacion',
   usuario_admin_id INT, -- Quién responde (NULL hasta que admin actúe)
   fecha_respuesta DATETIME,
   FOREIGN KEY (inventario_id) REFERENCES inventario(id),
@@ -88,7 +92,8 @@ CREATE TABLE asignaciones (
   colaborador_id INT NOT NULL,
   fecha_asignacion DATE,
   fecha_retiro DATE,
-  estado ENUM('asignado','retirado','devuelto') DEFAULT 'asignado',
+  motivo_retiro TEXT,
+  estado ENUM('asignado','retirado','devuelto','entrega_pendiente','donado') DEFAULT 'asignado',
   observaciones TEXT,
   FOREIGN KEY (inventario_id) REFERENCES inventario(id),
   FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id)
@@ -179,14 +184,6 @@ INSERT INTO usuarios (nombre, correo, contrasena, rol, activo)
 VALUES ('Ana García', 'admin@midominio.com', '$2a$12$Pwe/s1iED4iFzrSkKm74veYUzJoimXyfus2q9QB7Opt2ZDKPX26Sa', 'admin', 1);
 
 
-ALTER TABLE solicitudes
-ADD COLUMN motivo TEXT AFTER estado,
-ADD COLUMN nombre_equipo VARCHAR(100) NOT NULL AFTER inventario_id;
-ALTER TABLE solicitudes
-ADD COLUMN tipo VARCHAR(30) DEFAULT 'asignacion' AFTER motivo;
-ALTER TABLE asignaciones
-ADD COLUMN motivo_retiro TEXT AFTER fecha_retiro;
-
 -- Tabla para entregas de equipos por colaboradores
 CREATE TABLE entregas_colaborador (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -206,12 +203,6 @@ CREATE TABLE entregas_colaborador (
   FOREIGN KEY (inventario_id) REFERENCES inventario(id),
   FOREIGN KEY (usuario_admin_id) REFERENCES usuarios(id)
 );
-
--- Actualizar enum de estados del inventario para incluir nuevos estados
-ALTER TABLE inventario MODIFY COLUMN estado ENUM('activo','baja','reparacion','descarte','donado','inventario','solicitado','asignado','entrega_pendiente','revision_tecnica','donacion_pendiente') DEFAULT 'activo';
-
--- Actualizar enum de estados de asignaciones
-ALTER TABLE asignaciones MODIFY COLUMN estado ENUM('asignado','retirado','devuelto','entrega_pendiente','donado') DEFAULT 'asignado';
 
 -- Triggers para automatizar el manejo de descartes
 DELIMITER $$

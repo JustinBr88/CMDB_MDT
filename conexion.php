@@ -253,13 +253,8 @@ class Conexion {
         $stats['equipos_asignados'] = $result->fetch_assoc()['total'];
         $stmt->close();
         
-        // Entregas realizadas
-        $stmt = $this->conn->prepare("SELECT COUNT(*) as total FROM entregas_equipos WHERE colaborador_id = ?");
-        $stmt->bind_param("i", $colaborador_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stats['entregas_realizadas'] = $result->fetch_assoc()['total'];
-        $stmt->close();
+        // Entregas realizadas (funcionalidad eliminada - establecer en 0)
+        $stats['entregas_realizadas'] = 0;
         
         return $stats;
     }
@@ -1079,7 +1074,7 @@ class Conexion {
     // Obtener solicitudes de donación pendientes
     public function obtenerSolicitudesDonacion() {
         $sql = "SELECT d.*, 
-                       c.nombre as colaborador_nombre, c.apellido as colaborador_apellido, c.foto as colaborador_foto,
+                       c.id as colaborador_id, c.nombre as colaborador_nombre, c.apellido as colaborador_apellido, c.foto as colaborador_foto,
                        i.nombre_equipo, i.marca, i.modelo, i.numero_serie, i.imagen as equipo_imagen,
                        cat.nombre as categoria
                 FROM donaciones d
@@ -1203,7 +1198,7 @@ class Conexion {
     // Obtener todos los usuarios
     public function obtenerUsuarios() {
         try {
-            $sql = "SELECT id, nombre, correo, rol, activo, foto, created_at FROM usuarios ORDER BY id ASC";
+            $sql = "SELECT id, nombre, correo, rol, activo, foto, fecha_creacion FROM usuarios ORDER BY id ASC";
             $result = $this->conn->query($sql);
             
             if ($result) {
@@ -1293,6 +1288,62 @@ class Conexion {
         } catch (Exception $e) {
             $this->conn->rollback();
             error_log("Error en insertarColaborador(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Métodos para CRUD de Usuarios
+    public function verificarUsuarioExiste($correo) {
+        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ?");
+        $stmt->bind_param("s", $correo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $exists = $result->num_rows > 0;
+        $stmt->close();
+        return $exists;
+    }
+
+    public function verificarCorreoDuplicado($correo, $excluir_id) {
+        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ? AND id != ?");
+        $stmt->bind_param("si", $correo, $excluir_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $exists = $result->num_rows > 0;
+        $stmt->close();
+        return $exists;
+    }
+
+    public function crearUsuario($nombre, $correo, $rol, $contrasena, $activo) {
+        try {
+            $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+            $stmt = $this->conn->prepare("INSERT INTO usuarios (nombre, correo, rol, contrasena, activo, fecha_creacion) VALUES (?, ?, ?, ?, ?, NOW())");
+            $stmt->bind_param("ssssi", $nombre, $correo, $rol, $contrasena_hash, $activo);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en crearUsuario(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function actualizarUsuario($id, $nombre, $correo, $rol, $activo, $contrasena = null) {
+        try {
+            if ($contrasena) {
+                // Actualizar con nueva contraseña
+                $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, contrasena = ?, activo = ? WHERE id = ?");
+                $stmt->bind_param("ssssii", $nombre, $correo, $rol, $contrasena_hash, $activo, $id);
+            } else {
+                // Actualizar sin cambiar contraseña
+                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, activo = ? WHERE id = ?");
+                $stmt->bind_param("sssii", $nombre, $correo, $rol, $activo, $id);
+            }
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en actualizarUsuario(): " . $e->getMessage());
             return false;
         }
     }

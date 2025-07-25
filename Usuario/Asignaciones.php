@@ -5,7 +5,7 @@ $conexion = new Conexion();
 
 // Trae todos los equipos asignados y colaborador
 $sql = "SELECT a.id, a.inventario_id, a.colaborador_id, a.fecha_asignacion, a.fecha_retiro, a.estado as estado_asignacion,
-               c.nombre as colaborador_nombre, c.foto as colaborador_foto,
+               c.id as colaborador_id, c.nombre as colaborador_nombre, c.foto as colaborador_foto,
                i.nombre_equipo, i.imagen as equipo_imagen, i.marca, i.modelo, i.numero_serie, i.costo, i.estado as estado_equipo,
                (SELECT estado FROM donaciones WHERE inventario_id = a.inventario_id AND estado = 'aprobada' LIMIT 1) as fue_donado
         FROM asignaciones a
@@ -39,7 +39,7 @@ $result = $conexion->getConexion()->query($sql);
         <tbody>
             <?php
             while ($row = $result->fetch_assoc()) {
-                $foto = !empty($row['colaborador_foto']) ? "../uploads/{$row['colaborador_foto']}" : "../img/default-user.png";
+                $foto = "../mostrar_foto_usuario.php?tipo=colaborador&id=" . $row['colaborador_id'];
                 $imgEquipo = !empty($row['equipo_imagen']) ? "../uploads/{$row['equipo_imagen']}" : "../img/equipo.jpg";
                 echo "<tr data-id='{$row['id']}' data-inventario='{$row['inventario_id']}'
                           data-colaborador='{$row['colaborador_id']}'

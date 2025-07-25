@@ -18,7 +18,7 @@ $conexion = new Conexion();
 // SANITIZADO: Usar prepared statement en lugar de query directo
 $stmt = $conexion->getConexion()->prepare("
     SELECT a.id, a.inventario_id, a.colaborador_id, a.fecha_asignacion, a.fecha_retiro, a.estado as estado_asignacion,
-           c.nombre as colaborador_nombre, c.foto as colaborador_foto,
+           c.id as colaborador_id, c.id as colaborador_id, c.nombre as colaborador_nombre, c.foto as colaborador_foto,
            i.nombre_equipo, i.imagen as equipo_imagen, i.marca, i.modelo, i.numero_serie, i.costo, i.estado as estado_equipo,
            (SELECT estado FROM donaciones WHERE inventario_id = a.inventario_id AND estado = 'aprobada' LIMIT 1) as fue_donado
     FROM asignaciones a
@@ -55,7 +55,7 @@ $result = $stmt->get_result();
             <?php
             while ($row = $result->fetch_assoc()) {
                 // SANITIZADO: Escapar rutas de imágenes
-                $foto = !empty($row['colaborador_foto']) ? "../uploads/" . htmlspecialchars($row['colaborador_foto']) : "../img/default-user.png";
+                $foto = "../mostrar_foto_usuario.php?tipo=colaborador&id=" . htmlspecialchars($row['colaborador_id']);
                 $imgEquipo = !empty($row['equipo_imagen']) ? "../uploads/" . htmlspecialchars($row['equipo_imagen']) : "../img/equipo.jpg";
                 
                 // SANITIZADO: Escapar todos los data attributes
@@ -114,7 +114,7 @@ $conexion = new Conexion();
 // SANITIZADO: Usar prepared statement
 $stmt = $conexion->getConexion()->prepare("
     SELECT s.id, s.inventario_id, s.nombre_equipo, s.fecha_solicitud, s.estado, s.motivo,
-           c.nombre as colaborador_nombre, c.foto as colaborador_foto,
+           c.id as colaborador_id, c.nombre as colaborador_nombre, c.foto as colaborador_foto,
            i.imagen as equipo_imagen, i.categoria_id, i.marca, i.modelo, i.numero_serie, i.costo, i.fecha_ingreso, i.tiempo_depreciacion,
            cat.nombre as categoria_nombre, i.estado as equipo_estado
     FROM solicitudes s
@@ -156,7 +156,7 @@ $result = $stmt->get_result();
             <?php
             while ($row = $result->fetch_assoc()) {
                 // SANITIZADO: Escapar rutas de imágenes
-                $foto = !empty($row['colaborador_foto']) ? "../uploads/" . htmlspecialchars($row['colaborador_foto']) : "../img/default-user.png";
+                $foto = "../mostrar_foto_usuario.php?tipo=colaborador&id=" . htmlspecialchars($row['colaborador_id']);
                 $imgEquipo = !empty($row['equipo_imagen']) ? "../uploads/" . htmlspecialchars($row['equipo_imagen']) : "../img/equipo.jpg";
                 
                 // SANITIZADO: Escapar todos los data attributes

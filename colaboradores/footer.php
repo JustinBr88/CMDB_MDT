@@ -2,7 +2,7 @@
   <footer class="bg-dark text-light mt-5 py-4">
     <div class="container text-center">
       <p class="mb-2">
-        <a href="HomeColab.php" class="text-light mr-2">Inicio</a> |
+        <a href="portal_colaborador.php" class="text-light mr-2">Inicio</a> |
         <a href="InventarioColab.php" class="text-light mr-2">Inventario</a> |
         <a href="CategoriasColab.php" class="text-light mr-2">Categorías</a> |
         <a href="Colaboradores.php" class="text-light mr-2">Colaboradores</a> |

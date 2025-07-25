@@ -112,7 +112,7 @@ if ($es_directorio_colaborador) {
   <header>
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex" style="margin-right: 0px">
       <div class="col-lg-4">
-        <a href="<?php echo $es_colaborador ? ($es_directorio_colaborador ? 'HomeColab.php' : 'colaboradores/HomeColab.php') : ($es_directorio_usuario ? 'Home.php' : ($es_directorio_colaborador ? '../Usuario/Home.php' : 'Usuario/Home.php')); ?>" class="text-decoration-none">
+        <a href="<?php echo $es_colaborador ? ($es_directorio_colaborador ? 'portal_colaborador.php' : 'colaboradores/portal_colaborador.php') : ($es_directorio_usuario ? 'Home.php' : ($es_directorio_colaborador ? '../Usuario/Home.php' : 'Usuario/Home.php')); ?>" class="text-decoration-none">
           <img src="<?php echo $img_path; ?>logo.png" alt="logo" />
         </a>
       </div>
@@ -150,10 +150,8 @@ if ($es_directorio_colaborador) {
             } elseif ($es_colaborador) {
                 $nombreUsuario = htmlspecialchars($_SESSION['colaborador_nombre'] ?? $_SESSION['colaborador_usuario'] ?? 'Colaborador');
                 $rolUsuario = "Colaborador";
-                // Para colaborador, verificar si tiene foto personalizada
-                if (!empty($_SESSION['colaborador_foto'])) {
-                    $foto = $_SESSION['colaborador_foto'];
-                }
+                // Para colaborador, usar el sistema de mostrar_foto_usuario.php
+                $foto = $base_path . "mostrar_foto_usuario.php?tipo=colaborador&id=" . $_SESSION['colaborador_id'];
             }
           ?>
           <img src="<?php echo htmlspecialchars($foto); ?>" class="profile-pic-navbar-lg" alt="Foto de perfil" 
@@ -171,7 +169,7 @@ if ($es_directorio_colaborador) {
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand d-lg-none navbar-brand-title" href="<?php echo $es_colaborador ? ($es_directorio_colaborador ? 'HomeColab.php' : 'colaboradores/HomeColab.php') : ($es_directorio_usuario ? 'Home.php' : ($es_directorio_colaborador ? '../Usuario/Home.php' : 'Usuario/Home.php')); ?>">
+        <a class="navbar-brand d-lg-none navbar-brand-title" href="<?php echo $es_colaborador ? ($es_directorio_colaborador ? 'portal_colaborador.php' : 'colaboradores/portal_colaborador.php') : ($es_directorio_usuario ? 'Home.php' : ($es_directorio_colaborador ? '../Usuario/Home.php' : 'Usuario/Home.php')); ?>">
           MD Tecnología
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
@@ -200,7 +198,7 @@ if ($es_directorio_colaborador) {
               </li>
             <?php elseif ($es_colaborador): ?>
               <!-- Menú para Colaboradores -->
-              <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>HomeColab.php"><i class="fa fa-home"></i> Inicio</a></li>
+              <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>portal_colaborador.php"><i class="fa fa-home"></i> Inicio</a></li>
               <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>InventarioColab.php"><i class="fa fa-boxes"></i> Inventario</a></li>
               <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>SolicitudesColab.php"><i class="fa fa-list"></i> Solicitudes</a></li>
               <li class="nav-item dropdown">

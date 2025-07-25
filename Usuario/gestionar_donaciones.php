@@ -64,7 +64,7 @@ $solicitudes_donacion = $conexion->obtenerSolicitudesDonacion();
                             <tr>
                                 <td class="text-center">
                                     <?php 
-                                    $foto_colaborador = !empty($donacion['colaborador_foto']) ? "../uploads/" . $donacion['colaborador_foto'] : "../img/default.jpg";
+                                    $foto_colaborador = "../mostrar_foto_usuario.php?tipo=colaborador&id=" . $donacion['colaborador_id'];
                                     ?>
                                     <img src="<?= htmlspecialchars($foto_colaborador) ?>" class="rounded-circle mb-1" width="40" height="40" alt="Foto colaborador"><br>
                                     <small><strong><?= htmlspecialchars($donacion['colaborador_nombre'] . ' ' . $donacion['colaborador_apellido']) ?></strong></small>
