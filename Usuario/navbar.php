@@ -44,6 +44,31 @@ if (session_status() === PHP_SESSION_NONE) {
       color: #222;
       text-align: center;
     }
+    /* Estilos para el dropdown del usuario - simplificados */
+    .dropdown-toggle::after {
+      margin-left: 8px !important;
+    }
+    
+    .dropdown img {
+      transition: transform 0.2s ease;
+    }
+    
+    .dropdown:hover img {
+      transform: scale(1.05);
+    }
+    
+    /* Estilos para el dropdown menu personalizado */
+    .dropdown-menu {
+      position: absolute !important;
+      top: 100% !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+      min-width: 180px;
+      background-color: #fff;
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 0.375rem;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    }
   </style>
 </head>
 <body>
@@ -71,18 +96,13 @@ if (session_status() === PHP_SESSION_NONE) {
       <div class="col-lg-4 col-6 text-right">
         <div class="profile-pic-wrapper">
           <?php
-            if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
-                $foto = $_SESSION['foto'];
-            } else {
-                $foto = '../img/perfil.jpg';
-            }
             if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
                 $nombreUsuario = htmlspecialchars($_SESSION['usuario']);
             } else {
                 $nombreUsuario = "Inicia sesión para continuar";
             }
           ?>
-          <img src="<?php echo htmlspecialchars($foto); ?>" class="profile-pic-navbar-lg" alt="Foto de perfil">
+          <img src="../mostrar_foto_usuario.php" class="profile-pic-navbar-lg" alt="Foto de perfil">
           <div class="profile-username-navbar">
             <?php echo $nombreUsuario; ?>
           </div>
@@ -93,29 +113,38 @@ if (session_status() === PHP_SESSION_NONE) {
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
         <a class="navbar-brand d-lg-none" href="Home.php">MD Tecnología</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
           aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
-          <ul class="navbar-nav mr-auto">
+          <ul class="navbar-nav me-auto">
             <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
             <li class="nav-item"><a class="nav-link" href="Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
             <li class="nav-item"><a class="nav-link" href="Asignaciones.php"><i class="fa fa-users"></i> Asignaciones</a></li>
+            <li class="nav-item"><a class="nav-link" href="Descarte.php"><i class="fa fa-trash-alt"></i> Descartes</a></li>
+            <li class="nav-item"><a class="nav-link" href="Reportes.php"><i class="fa fa-chart-bar"></i> Reportes</a></li>
             <li class="nav-item"><a class="nav-link" href="Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
           </ul>
-          <ul class="navbar-nav ml-auto">
+          <ul class="navbar-nav ms-auto">
             <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
-              <li class="nav-item">
-                <a class="nav-link text-light" href="Perfil.php"><i class="fa fa-user"></i> Perfil</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-danger font-weight-bold" href="logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center text-light" href="#" id="userDropdown" role="button" onclick="toggleDropdown(event)">
+                  <!-- Mostrar foto desde la base de datos -->
+                  <img src="../mostrar_foto_usuario.php" alt="Foto de perfil" class="rounded-circle me-2" 
+                       width="35" height="35" style="object-fit: cover; border: 2px solid #fff;">
+                  <span><?= htmlspecialchars($_SESSION['usuario'] ?? 'Usuario') ?></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" id="userDropdownMenu" style="display: none;">
+                  <li><a class="dropdown-item" href="Perfil.php"><i class="fa fa-user me-2"></i>Mi Perfil</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                </ul>
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link text-primary font-weight-bold" href="Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+                <a class="nav-link text-primary font-weight-bold" href="../Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
               </li>
             <?php endif; ?>
           </ul>
@@ -125,3 +154,38 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Navbar End -->
   </header>
   <!-- Header End -->
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Función para manejar el dropdown del usuario
+    function toggleDropdown(event) {
+      event.preventDefault();
+      const menu = document.getElementById('userDropdownMenu');
+      const isVisible = menu.style.display === 'block';
+      
+      // Cerrar todos los dropdowns abiertos
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+      
+      // Toggle del dropdown actual
+      menu.style.display = isVisible ? 'none' : 'block';
+    }
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('userDropdown');
+      const menu = document.getElementById('userDropdownMenu');
+      
+      if (!dropdown.contains(event.target)) {
+        menu.style.display = 'none';
+      }
+    });
+    
+    // Cerrar dropdown al hacer clic en un enlace
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.getElementById('userDropdownMenu').style.display = 'none';
+      });
+    });
+  </script>

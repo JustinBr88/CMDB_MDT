@@ -1472,3 +1472,140 @@ h6 {
   justify-content: center;
   align-items: center;
 }
+
+/* Estilos específicos para reportes */
+.reporte-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.reporte-card .card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+}
+
+.estadistica-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 10px;
+  border: none;
+}
+
+.estadistica-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.estadistica-card h3 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.badge-custom {
+  font-size: 0.9rem;
+  padding: 0.5em 0.8em;
+}
+
+.progress {
+  height: 25px;
+  background-color: #e9ecef;
+  border-radius: 12px;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #28a745, #20c997, #17a2b8);
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.btn-reporte {
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-reporte:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.table-reportes {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-reportes thead th {
+  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.table-reportes tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+  transition: all 0.2s;
+}
+
+.modal-detalle .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-detalle .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.filtro-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.filtro-container .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+  .estadistica-card h3 {
+    font-size: 2rem;
+  }
+  
+  .btn-reporte {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+}

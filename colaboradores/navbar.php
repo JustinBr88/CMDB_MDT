@@ -115,7 +115,7 @@ if (session_status() === PHP_SESSION_NONE) {
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
               <li class="nav-item">
-                <a class="nav-link text-light" href="/Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+                <a class="nav-link text-light" href="Usuario/Perfil.php"><i class="fa fa-user"></i> Perfil</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link text-danger font-weight-bold" href="/logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
