@@ -35,20 +35,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Si es el campo de categoría, crear un select
                 if (campo === 'categoria_id') {
-                    fetch('../api_categorias.php?action=getCategorias')
-                        .then(res => res.json())
-                        .then(categorias => {
-                            let selectHtml = '<select class="form-control" data-campo="categoria_id">';
-                            categorias.forEach(cat => {
-                                const selected = cat.nombre === valor ? 'selected' : '';
-                                selectHtml += `<option value="${cat.id}" ${selected}>${cat.nombre}</option>`;
-                            });
-                            selectHtml += '</select>';
-                            td.innerHTML = selectHtml;
-                        })
-                        .catch(() => {
-                            td.innerHTML = `<input type="text" class="form-control" value="${valor}">`;
-                        });
+                    // Usar datos embebidos en lugar de fetch
+                    let categorias = window.categoriasData || [];
+                    
+                    // Si no hay categorías embebidas, usar valores por defecto
+                    if (categorias.length === 0) {
+                        console.log('No se encontraron categorías embebidas, usando valores por defecto');
+                        categorias = [
+                            {id: 1, nombre: 'Hardware'},
+                            {id: 2, nombre: 'Software'},
+                            {id: 3, nombre: 'Periféricos'},
+                            {id: 4, nombre: 'Redes'},
+                            {id: 5, nombre: 'Móviles'},
+                            {id: 6, nombre: 'Servidores'}
+                        ];
+                    }
+                    
+                    console.log('Categorías disponibles para edición:', categorias);
+                    
+                    let selectHtml = '<select class="form-control" data-campo="categoria_id">';
+                    categorias.forEach(cat => {
+                        // Comparar con el nombre mostrado en la celda (categoria_nombre)
+                        const selected = cat.nombre === valor ? 'selected' : '';
+                        selectHtml += `<option value="${cat.id}" ${selected}>${cat.nombre}</option>`;
+                    });
+                    selectHtml += '</select>';
+                    td.innerHTML = selectHtml;
                 } else if (campo === 'estado') {
                     // Para el estado, crear select pero bloquear ciertos estados
                     const estados = [
@@ -128,7 +140,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     manejarRespuestaAjax(resp, () => {
                         tr.querySelectorAll('.editable').forEach(function (td) {
                             const campo = td.getAttribute('data-campo');
-                            td.textContent = datos[campo];
+                            
+                            // Para el campo de categoría, mostrar el nombre en lugar del ID
+                            if (campo === 'categoria_id') {
+                                const select = td.querySelector('select');
+                                if (select) {
+                                    const selectedOption = select.options[select.selectedIndex];
+                                    td.textContent = selectedOption.text; // Mostrar el nombre de la categoría
+                                } else {
+                                    td.textContent = datos[campo];
+                                }
+                            } else {
+                                td.textContent = datos[campo];
+                            }
                         });
                         tr.querySelector('.btn-editar').classList.remove('d-none');
                         tr.querySelector('.btn-guardar').classList.add('d-none');

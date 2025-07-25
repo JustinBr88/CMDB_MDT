@@ -3,6 +3,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Incluir sanitización
+require_once (basename(dirname($_SERVER['SCRIPT_NAME'])) === 'colaboradores' || basename(dirname($_SERVER['SCRIPT_NAME'])) === 'Usuario') ? '../sanitizardatos.php' : 'sanitizardatos.php';
+
 // Determinar el tipo de usuario y rutas base
 $es_admin = isset($_SESSION['logeado']) && $_SESSION['logeado'] === true;
 $es_colaborador = isset($_SESSION['colaborador_logeado']) && $_SESSION['colaborador_logeado'] === true;
@@ -157,9 +160,9 @@ if ($es_directorio_colaborador) {
           <img src="<?php echo htmlspecialchars($foto); ?>" class="profile-pic-navbar-lg" alt="Foto de perfil" 
                onerror="this.src='<?php echo $foto_default; ?>';">
           <div class="profile-username-navbar">
-            <?php echo $nombreUsuario; ?>
+            <?php echo h($nombreUsuario); ?>
             <?php if ($rolUsuario): ?>
-              <div class="user-role-badge"><?php echo $rolUsuario; ?></div>
+              <div class="user-role-badge"><?php echo h($rolUsuario); ?></div>
             <?php endif; ?>
           </div>
         </div>
@@ -209,7 +212,6 @@ if ($es_directorio_colaborador) {
                   <li><a class="dropdown-item" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
                 </ul>
               </li>
-              <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
             <?php else: ?>
               <!-- Menú para usuarios no logueados -->
               <li class="nav-item"><a class="nav-link" href="<?php echo $login_path; ?>"><i class="fa fa-sign-in-alt"></i> Iniciar Sesión</a></li>

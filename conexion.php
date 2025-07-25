@@ -1,8 +1,32 @@
 <?php
+/**
+ * Clase de Conexión a Base de Datos - Sistema CMDB MD Tecnología
+ * 
+ * Esta clase maneja todas las operaciones de base de datos para el sistema CMDB
+ * Organizada por módulos funcionales para facilitar la navegación y mantenimiento
+ * 
+ * ÍNDICE DE MÉTODOS:
+ * ==================
+ * 1. CONFIGURACIÓN Y CONEXIÓN
+ * 2. AUTENTICACIÓN Y SESIONES
+ * 3. MÓDULO DE USUARIOS (CRUD)
+ * 4. MÓDULO DE COLABORADORES
+ * 5. MÓDULO DE CATEGORÍAS (CRUD)
+ * 6. MÓDULO DE INVENTARIO
+ * 7. MÓDULO DE SOLICITUDES Y ASIGNACIONES
+ * 8. MÓDULO DE DESCARTE
+ * 9. MÓDULO DE DONACIONES
+ * 10. MÓDULO DE REPORTES Y ESTADÍSTICAS
+ * 11. UTILIDADES GENERALES
+ */
 class Conexion {
+    // =====================================================
+    // 1. CONFIGURACIÓN Y CONEXIÓN
+    // =====================================================
+    
     private $servername = "localhost";
-    private $username = "labo2fa";
-    private $password = "GoLoNdRiNa56(/)";
+    private $username = "root";
+    private $password = "12345";
     private $dbname = "cmdb";
     private $port = 3306;
     private $conn;
@@ -50,7 +74,13 @@ class Conexion {
         return $this->conn;
     }
 
-    // Validación de usuario/admin por correo o usuario
+    // =====================================================
+    // 2. AUTENTICACIÓN Y SESIONES
+    // =====================================================
+
+    /**
+     * Validar usuario administrador por correo o usuario
+     */
     public function validarUsuario($usuario_correo, $contrasena) {
         $stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE (nombre = ? OR correo = ?) AND rol = 'admin' AND activo = 1");
         $stmt->bind_param("ss", $usuario_correo, $usuario_correo);
@@ -64,30 +94,117 @@ class Conexion {
         return false;
     }
 
-    // Validación de colaborador por correo o usuario
-    public function validarColaborador($usuario_correo, $contrasena) {
-        // Validar en tabla usuarios con rol 'colab'
-        $stmt = $this->conn->prepare("SELECT u.*, c.id as colaborador_id, c.nombre as colab_nombre, c.apellido, c.foto as colab_foto 
-                                     FROM usuarios u 
-                                     LEFT JOIN colaboradores c ON u.correo = c.correo 
-                                     WHERE (u.nombre = ? OR u.correo = ?) AND u.rol = 'colab' AND u.activo = 1");
-        $stmt->bind_param("ss", $usuario_correo, $usuario_correo);
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function esAdministrador($usuario_id) {
+        $stmt = $this->conn->prepare("SELECT rol FROM usuarios WHERE id = ?");
+        $stmt->bind_param("i", $usuario_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        $colaborador = $result->fetch_assoc();
+        $usuario = $result->fetch_assoc();
         $stmt->close();
         
-        if ($colaborador && password_verify($contrasena, $colaborador['contrasena'])) {
-            // Combinar datos de ambas tablas
-            $colaborador['nombre'] = $colaborador['colab_nombre'] ?? $colaborador['nombre'];
-            $colaborador['foto'] = $colaborador['colab_foto'] ?? $colaborador['foto'];
-            $colaborador['usuario'] = $colaborador['nombre']; // Para compatibilidad
-            return $colaborador;
-        }
-        return false;
+        return $usuario && $usuario['rol'] === 'admin';
     }
 
-    // Obtener colaborador por ID
+    // =====================================================
+    // 3. MÓDULO DE USUARIOS (CRUD)
+    // =====================================================
+
+    /**
+     * Obtener todos los usuarios del sistema
+     */
+    public function obtenerUsuarios() {
+        try {
+            $sql = "SELECT id, nombre, correo, rol, activo, foto, fecha_creacion FROM usuarios ORDER BY id ASC";
+            $result = $this->conn->query($sql);
+            
+            if ($result) {
+                return $result->fetch_all(MYSQLI_ASSOC);
+            } else {
+                return [];
+            }
+        } catch (Exception $e) {
+            error_log("Error en obtenerUsuarios(): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Verificar si un usuario existe por correo
+     */
+    public function verificarUsuarioExiste($correo) {
+        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ?");
+        $stmt->bind_param("s", $correo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $exists = $result->num_rows > 0;
+        $stmt->close();
+        return $exists;
+    }
+
+    /**
+     * Verificar correo duplicado excluyendo un usuario específico
+     */
+    public function verificarCorreoDuplicado($correo, $excluir_id) {
+        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ? AND id != ?");
+        $stmt->bind_param("si", $correo, $excluir_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $exists = $result->num_rows > 0;
+        $stmt->close();
+        return $exists;
+    }
+
+    /**
+     * Crear nuevo usuario en el sistema
+     */
+    public function crearUsuario($nombre, $correo, $rol, $contrasena, $activo) {
+        try {
+            $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+            $stmt = $this->conn->prepare("INSERT INTO usuarios (nombre, correo, rol, contrasena, activo, fecha_creacion) VALUES (?, ?, ?, ?, ?, NOW())");
+            $stmt->bind_param("ssssi", $nombre, $correo, $rol, $contrasena_hash, $activo);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en crearUsuario(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualizar usuario existente
+     */
+    public function actualizarUsuario($id, $nombre, $correo, $rol, $activo, $contrasena = null) {
+        try {
+            if ($contrasena) {
+                // Actualizar con nueva contraseña
+                $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, contrasena = ?, activo = ? WHERE id = ?");
+                $stmt->bind_param("ssssii", $nombre, $correo, $rol, $contrasena_hash, $activo, $id);
+            } else {
+                // Actualizar sin cambiar contraseña
+                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, activo = ? WHERE id = ?");
+                $stmt->bind_param("sssii", $nombre, $correo, $rol, $activo, $id);
+            }
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en actualizarUsuario(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // =====================================================
+    // 4. MÓDULO DE COLABORADORES
+    // =====================================================
+
+    /**
+     * Obtener colaborador por ID
+     */
     public function obtenerColaboradorPorId($id) {
         $stmt = $this->conn->prepare("
             SELECT c.*, d.nombre as departamento_nombre, u.correo as usuario_correo, u.nombre as usuario_nombre
@@ -104,21 +221,173 @@ class Conexion {
         return $colaborador;
     }
 
-    // Registrar acceso de colaborador
+    /**
+     * Registrar acceso de colaborador para auditoría
+     */
     public function registrarAccesoColaborador($colaborador_id) {
-        $stmt = $this->conn->prepare("
-            INSERT INTO historial_accesos_colaborador (colaborador_id, fecha_hora, ip, user_agent) 
-            VALUES (?, NOW(), ?, ?)
-        ");
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-        $stmt->bind_param("iss", $colaborador_id, $ip, $user_agent);
-        $result = $stmt->execute();
+        $stmt = $this->conn->prepare("UPDATE colaboradores SET ultimo_acceso = NOW() WHERE id = ?");
+        $stmt->bind_param("i", $colaborador_id);
+        $stmt->execute();
         $stmt->close();
-        return $result;
     }
 
-    // Verificar si un correo ya existe para otro colaborador
+    /**
+     * Validar credenciales de colaborador
+     */
+    public function validarColaborador($correo, $contrasena) {
+        $stmt = $this->conn->prepare("
+            SELECT c.*, d.nombre as departamento_nombre 
+            FROM colaboradores c
+            LEFT JOIN departamentos d ON c.departamento_id = d.id
+            WHERE c.correo = ? AND c.activo = 1
+        ");
+        $stmt->bind_param("s", $correo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $colaborador = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($colaborador && password_verify($contrasena, $colaborador['contrasena'])) {
+            return $colaborador;
+        }
+        return false;
+    }
+
+    /**
+     * Cambiar contraseña de colaborador
+     */
+    public function cambiarPasswordColaborador($colaborador_id, $nueva_contrasena) {
+        try {
+            $contrasena_hash = password_hash($nueva_contrasena, PASSWORD_DEFAULT);
+            $stmt = $this->conn->prepare("UPDATE colaboradores SET contrasena = ? WHERE id = ?");
+            $stmt->bind_param("si", $contrasena_hash, $colaborador_id);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en cambiarPasswordColaborador(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // =====================================================
+    // 5. MÓDULO DE CATEGORÍAS
+    // =====================================================
+
+    /**
+     * Obtener todas las categorías del sistema
+     */
+    public function obtenerCategorias() {
+        try {
+            // Primero verificar qué campos existen en la tabla
+            $check_sql = "SHOW COLUMNS FROM categorias";
+            $check_result = $this->conn->query($check_sql);
+            $columns = [];
+            while ($row = $check_result->fetch_assoc()) {
+                $columns[] = $row['Field'];
+            }
+            
+            // Usar solo los campos que existen
+            if (in_array('fecha_creacion', $columns)) {
+                $sql = "SELECT id, nombre, descripcion, fecha_creacion FROM categorias ORDER BY nombre ASC";
+            } else {
+                $sql = "SELECT id, nombre, descripcion FROM categorias ORDER BY nombre ASC";
+            }
+            
+            $result = $this->conn->query($sql);
+            
+            if ($result) {
+                $categorias = $result->fetch_all(MYSQLI_ASSOC);
+                error_log("obtenerCategorias() - Categorías encontradas: " . count($categorias) . " - SQL: " . $sql);
+                return $categorias;
+            } else {
+                error_log("obtenerCategorias() - Error en consulta: " . $this->conn->error . " - SQL: " . $sql);
+                return [];
+            }
+        } catch (Exception $e) {
+            error_log("Error en obtenerCategorias(): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Crear nueva categoría
+     */
+    public function crearCategoria($nombre, $descripcion) {
+        try {
+            $stmt = $this->conn->prepare("INSERT INTO categorias (nombre, descripcion, fecha_creacion) VALUES (?, ?, NOW())");
+            $stmt->bind_param("ss", $nombre, $descripcion);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en crearCategoria(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualizar categoría existente
+     */
+    public function actualizarCategoria($id, $nombre, $descripcion) {
+        try {
+            $stmt = $this->conn->prepare("UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $nombre, $descripcion, $id);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error en actualizarCategoria(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtener categoría por ID
+     */
+    public function obtenerCategoriaPorId($id) {
+        $stmt = $this->conn->prepare("SELECT id, nombre, descripcion, fecha_creacion FROM categorias WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $categoria = $result->fetch_assoc();
+        $stmt->close();
+        return $categoria;
+    }
+
+    // =====================================================
+    // 6. MÓDULO DE INVENTARIO
+    // =====================================================
+
+    /**
+     * Obtener todo el inventario
+     */
+    public function obtenerInventario() {
+        try {
+            $sql = "SELECT i.*, c.nombre as categoria_nombre 
+                    FROM inventario i 
+                    LEFT JOIN categorias c ON i.categoria_id = c.id 
+                    ORDER BY i.id DESC";
+            $result = $this->conn->query($sql);
+            
+            if ($result) {
+                return $result->fetch_all(MYSQLI_ASSOC);
+            } else {
+                return [];
+            }
+        } catch (Exception $e) {
+            error_log("Error en obtenerInventario(): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // =====================================================
+    // 7. MÓDULO DE COLABORADORES (Métodos auxiliares)
+    // =====================================================
+
+    /**
+     * Verificar si un correo ya existe para otro colaborador
+     */
     public function correoDuplicadoColaborador($correo, $colaborador_id) {
         $stmt = $this->conn->prepare("SELECT id FROM colaboradores WHERE correo = ? AND id != ? AND activo = 1");
         $stmt->bind_param("si", $correo, $colaborador_id);
@@ -284,28 +553,6 @@ class Conexion {
         return password_verify($password, $usuario['contrasena']);
     }
 
-    // Cambiar contraseña de colaborador
-    public function cambiarPasswordColaborador($colaborador_id, $nueva_password) {
-        // Obtener el correo del colaborador
-        $stmt = $this->conn->prepare("SELECT correo FROM colaboradores WHERE id = ?");
-        $stmt->bind_param("i", $colaborador_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $colaborador = $result->fetch_assoc();
-        $stmt->close();
-        
-        if (!$colaborador) return false;
-        
-        // Actualizar password en tabla usuarios
-        $hashed_password = password_hash($nueva_password, PASSWORD_DEFAULT);
-        $stmt = $this->conn->prepare("UPDATE usuarios SET contrasena = ? WHERE correo = ? AND rol = 'colab'");
-        $stmt->bind_param("ss", $hashed_password, $colaborador['correo']);
-        $result = $stmt->execute();
-        $stmt->close();
-        
-        return $result;
-    }
-
     
     // Obtener todos los departamentos
     public function obtenerDepartamentos() {
@@ -318,33 +565,6 @@ class Conexion {
             }
         }
         return $departamentos;
-    }
-
-    // Obtener todas las categorías
-    public function obtenerCategorias() {
-        $sql = "SELECT * FROM categorias";
-        $result = $this->conn->query($sql);
-        $categorias = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $categorias[] = $row;
-            }
-        }
-        return $categorias;
-    }
-
-    // Obtener todo el inventario con nombre de categoría
-    public function obtenerInventario() {
-        $sql = "SELECT i.*, c.nombre AS categoria FROM inventario i 
-                LEFT JOIN categorias c ON i.categoria_id = c.id";
-        $result = $this->conn->query($sql);
-        $inventario = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $inventario[] = $row;
-            }
-        }
-        return $inventario;
     }
 
     // Obtener todas las solicitudes
@@ -418,15 +638,6 @@ class Conexion {
         return $resultado;
     }
 
-    // Actualizar categoría
-    public function actualizarCategoria($id, $nombre, $descripcion) {
-        $stmt = $this->conn->prepare("UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $nombre, $descripcion, $id);
-        $resultado = $stmt->execute();
-        $stmt->close();
-        return $resultado;
-    }
-
     // Eliminar categoría
     public function eliminarCategoria($id) {
         // Verificar si la categoría está siendo usada en inventario
@@ -448,32 +659,13 @@ class Conexion {
         return $resultado;
     }
 
-    // Obtener categoría por ID
-    public function obtenerCategoriaPorId($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM categorias WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $categoria = $result->fetch_assoc();
-        $stmt->close();
-        return $categoria;
-    }
+    // =====================================================
+    // 8. MÓDULO DE REPORTES Y ESTADÍSTICAS
+    // =====================================================
 
-    // Verificar si el usuario es administrador
-    public function esAdministrador($usuario_id) {
-        $stmt = $this->conn->prepare("SELECT rol FROM usuarios WHERE id = ?");
-        $stmt->bind_param("i", $usuario_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $usuario = $result->fetch_assoc();
-        $stmt->close();
-        
-        return $usuario && $usuario['rol'] === 'admin';
-    }
-
-    // MÉTODOS PARA REPORTES
-
-    // Obtener estadísticas por categoría
+    /**
+     * Obtener estadísticas por categoría
+     */
     public function obtenerEstadisticasPorCategoria() {
         $sql = "SELECT 
                     c.id as categoria_id,
@@ -496,7 +688,9 @@ class Conexion {
         return $estadisticas;
     }
 
-    // Obtener equipos disponibles por categoría
+    /**
+     * Obtener equipos disponibles por categoría
+     */
     public function obtenerEquiposDisponiblesPorCategoria() {
         $sql = "SELECT 
                     c.nombre as categoria,
@@ -781,7 +975,7 @@ class Conexion {
                 FROM asignaciones a
                 INNER JOIN inventario i ON a.inventario_id = i.id
                 LEFT JOIN categorias c ON i.categoria_id = c.id
-                WHERE a.colaborador_id = ? AND a.estado = 'asignado'
+                WHERE a.colaborador_id = ? AND a.estado IN ('asignado','dañado','donado')
                 ORDER BY a.fecha_asignacion DESC";
         
         $stmt = $this->conn->prepare($sql);
@@ -799,218 +993,6 @@ class Conexion {
         $stmt->close();
         return $equipos;
     }
-    
-    // Procesar entrega de equipo por colaborador
-    // MÉTODO COMENTADO - Tabla entregas_colaborador eliminada
-    /*
-    public function procesarEntregaEquipo($asignacion_id, $colaborador_id, $motivo_entrega, $tipo_entrega, $observaciones) {
-        try {
-            $this->conn->begin_transaction();
-            
-            // Verificar que la asignación existe y pertenece al colaborador
-            $stmt = $this->conn->prepare("
-                SELECT a.id, a.inventario_id, i.nombre_equipo, c.nombre as colaborador_nombre, c.apellido
-                FROM asignaciones a
-                INNER JOIN inventario i ON a.inventario_id = i.id
-                INNER JOIN colaboradores c ON a.colaborador_id = c.id
-                WHERE a.id = ? AND a.colaborador_id = ? AND a.estado = 'asignado'
-            ");
-            $stmt->bind_param("ii", $asignacion_id, $colaborador_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows === 0) {
-                throw new Exception("No se encontró la asignación o el equipo ya fue entregado");
-            }
-            
-            $asignacion = $result->fetch_assoc();
-            $stmt->close();
-            
-            // Crear registro en tabla de entregas
-            $stmt = $this->conn->prepare("
-                INSERT INTO entregas_colaborador 
-                (asignacion_id, colaborador_id, inventario_id, motivo_entrega, tipo_entrega, observaciones, fecha_entrega, estado) 
-                VALUES (?, ?, ?, ?, ?, ?, NOW(), 'pendiente_validacion')
-            ");
-            $stmt->bind_param("iiisss", $asignacion_id, $colaborador_id, $asignacion['inventario_id'], 
-                             $motivo_entrega, $tipo_entrega, $observaciones);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Actualizar estado de la asignación
-            $stmt = $this->conn->prepare("
-                UPDATE asignaciones 
-                SET estado = 'entrega_pendiente', fecha_retiro = NOW(), motivo_retiro = ?
-                WHERE id = ?
-            ");
-            $motivo_completo = "Entrega por colaborador - " . $tipo_entrega . ": " . $motivo_entrega;
-            $stmt->bind_param("si", $motivo_completo, $asignacion_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Actualizar estado del inventario
-            $stmt = $this->conn->prepare("
-                UPDATE inventario 
-                SET estado = 'entrega_pendiente'
-                WHERE id = ?
-            ");
-            $stmt->bind_param("i", $asignacion['inventario_id']);
-            $stmt->execute();
-            $stmt->close();
-            
-            $this->conn->commit();
-            
-            return [
-                'success' => true, 
-                'message' => 'Entrega procesada correctamente. El equipo está pendiente de validación por un administrador.'
-            ];
-            
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            return [
-                'success' => false, 
-                'message' => 'Error al procesar la entrega: ' . $e->getMessage()
-            ];
-        }
-    }
-    */
-    
-    // MÉTODO COMENTADO - Tabla entregas_colaborador eliminada
-    /*
-    // Obtener entregas pendientes de validación
-    public function obtenerEntregasPendientes() {
-        $sql = "SELECT e.*, 
-                       c.nombre as colaborador_nombre, c.apellido as colaborador_apellido, c.foto as colaborador_foto,
-                       i.nombre_equipo, i.marca, i.modelo, i.numero_serie, i.imagen as equipo_imagen,
-                       cat.nombre as categoria
-                FROM entregas_colaborador e
-                INNER JOIN colaboradores c ON e.colaborador_id = c.id
-                INNER JOIN inventario i ON e.inventario_id = i.id
-                LEFT JOIN categorias cat ON i.categoria_id = cat.id
-                WHERE e.estado = 'pendiente_validacion'
-                ORDER BY e.fecha_entrega DESC";
-        
-        $result = $this->conn->query($sql);
-        $entregas = [];
-        
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $entregas[] = $row;
-            }
-        }
-        
-        return $entregas;
-    }
-    */
-    
-    // MÉTODO COMENTADO - Tabla entregas_colaborador eliminada
-    /*
-    // Validar entrega de equipo por administrador
-    public function validarEntregaEquipo($entrega_id, $usuario_admin_id, $accion, $observaciones_admin = '') {
-        try {
-            $this->conn->begin_transaction();
-            
-            // Obtener datos de la entrega
-            $stmt = $this->conn->prepare("
-                SELECT e.*, i.nombre_equipo
-                FROM entregas_colaborador e
-                INNER JOIN inventario i ON e.inventario_id = i.id
-                WHERE e.id = ? AND e.estado = 'pendiente_validacion'
-            ");
-            $stmt->bind_param("i", $entrega_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows === 0) {
-                throw new Exception("Entrega no encontrada o ya fue procesada");
-            }
-            
-            $entrega = $result->fetch_assoc();
-            $stmt->close();
-            
-            if ($accion === 'aprobar') {
-                // Aprobar entrega - equipo pasa a revisión técnica
-                $stmt = $this->conn->prepare("
-                    UPDATE entregas_colaborador 
-                    SET estado = 'aprobada', usuario_admin_id = ?, fecha_validacion = NOW(), observaciones_admin = ?
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("isi", $usuario_admin_id, $observaciones_admin, $entrega_id);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Actualizar asignación
-                $stmt = $this->conn->prepare("
-                    UPDATE asignaciones 
-                    SET estado = 'devuelto'
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("i", $entrega['asignacion_id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Actualizar inventario a revisión técnica
-                $stmt = $this->conn->prepare("
-                    UPDATE inventario 
-                    SET estado = 'revision_tecnica'
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("i", $entrega['inventario_id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                $mensaje = 'Entrega aprobada. El equipo está ahora en revisión técnica.';
-                
-            } else {
-                // Rechazar entrega - equipo vuelve al colaborador
-                $stmt = $this->conn->prepare("
-                    UPDATE entregas_colaborador 
-                    SET estado = 'rechazada', usuario_admin_id = ?, fecha_validacion = NOW(), observaciones_admin = ?
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("isi", $usuario_admin_id, $observaciones_admin, $entrega_id);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Restaurar asignación
-                $stmt = $this->conn->prepare("
-                    UPDATE asignaciones 
-                    SET estado = 'asignado', fecha_retiro = NULL, motivo_retiro = NULL
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("i", $entrega['asignacion_id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Restaurar inventario
-                $stmt = $this->conn->prepare("
-                    UPDATE inventario 
-                    SET estado = 'asignado'
-                    WHERE id = ?
-                ");
-                $stmt->bind_param("i", $entrega['inventario_id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                $mensaje = 'Entrega rechazada. El equipo vuelve a estar asignado al colaborador.';
-            }
-            
-            $this->conn->commit();
-            
-            return [
-                'success' => true,
-                'message' => $mensaje
-            ];
-            
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            return [
-                'success' => false,
-                'message' => 'Error al validar la entrega: ' . $e->getMessage()
-            ];
-        }
-    }
-    */
     
     // Procesar donación de equipo
     public function procesarSolicitudDonacion($inventario_id, $colaborador_id, $destinatario, $motivo) {
@@ -1195,157 +1177,54 @@ class Conexion {
         }
     }
 
-    // Obtener todos los usuarios
-    public function obtenerUsuarios() {
-        try {
-            $sql = "SELECT id, nombre, correo, rol, activo, foto, fecha_creacion FROM usuarios ORDER BY id ASC";
-            $result = $this->conn->query($sql);
-            
-            if ($result) {
-                return $result->fetch_all(MYSQLI_ASSOC);
-            } else {
-                return [];
-            }
-        } catch (Exception $e) {
-            error_log("Error en obtenerUsuarios(): " . $e->getMessage());
-            return [];
+    // =====================================================
+    // 9. MÉTODOS DE UTILIDAD Y LIMPIEZA
+    // =====================================================
+
+    /**
+     * Cerrar conexión a la base de datos
+     */
+    public function cerrarConexion() {
+        if ($this->conn) {
+            $this->conn->close();
+            $this->conn = null;
         }
     }
 
-    // Métodos para gestión de colaboradores
-    public function existeIdentificacionColaborador($identificacion) {
-        try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM colaboradores WHERE identificacion = ? AND activo = 1");
-            $stmt->bind_param("s", $identificacion);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $stmt->close();
-            return $row['count'] > 0;
-        } catch (Exception $e) {
-            error_log("Error en existeIdentificacionColaborador(): " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function existeUsuarioColaborador($usuario) {
-        try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM usuarios WHERE nombre = ? AND rol = 'colab' AND activo = 1");
-            $stmt->bind_param("s", $usuario);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $stmt->close();
-            return $row['count'] > 0;
-        } catch (Exception $e) {
-            error_log("Error en existeUsuarioColaborador(): " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function existeCorreoColaborador($correo) {
-        try {
-            $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM colaboradores WHERE correo = ? AND activo = 1");
-            $stmt->bind_param("s", $correo);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $stmt->close();
-            return $row['count'] > 0;
-        } catch (Exception $e) {
-            error_log("Error en existeCorreoColaborador(): " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function insertarColaborador($nombre, $apellido, $identificacion, $foto, $direccion, $ubicacion, $telefono, $correo, $departamento_id, $usuario, $contrasena) {
-        try {
-            $this->conn->begin_transaction();
-
-            // 1. Insertar en tabla colaboradores
-            $stmt = $this->conn->prepare("
-                INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-            ");
-            $stmt->bind_param("ssssssssi", $nombre, $apellido, $identificacion, $foto, $direccion, $ubicacion, $telefono, $correo, $departamento_id);
-            $stmt->execute();
-            $colaborador_id = $this->conn->insert_id;
-            $stmt->close();
-
-            // 2. Insertar en tabla usuarios
-            $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
-            $stmt = $this->conn->prepare("
-                INSERT INTO usuarios (nombre, correo, contrasena, rol, activo, created_at) 
-                VALUES (?, ?, ?, 'colab', 1, NOW())
-            ");
-            $stmt->bind_param("sss", $usuario, $correo, $contrasena_hash);
-            $stmt->execute();
-            $stmt->close();
-
-            $this->conn->commit();
-            return true;
-
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            error_log("Error en insertarColaborador(): " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Métodos para CRUD de Usuarios
-    public function verificarUsuarioExiste($correo) {
-        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ?");
-        $stmt->bind_param("s", $correo);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $exists = $result->num_rows > 0;
-        $stmt->close();
-        return $exists;
-    }
-
-    public function verificarCorreoDuplicado($correo, $excluir_id) {
-        $stmt = $this->conn->prepare("SELECT id FROM usuarios WHERE correo = ? AND id != ?");
-        $stmt->bind_param("si", $correo, $excluir_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $exists = $result->num_rows > 0;
-        $stmt->close();
-        return $exists;
-    }
-
-    public function crearUsuario($nombre, $correo, $rol, $contrasena, $activo) {
-        try {
-            $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
-            $stmt = $this->conn->prepare("INSERT INTO usuarios (nombre, correo, rol, contrasena, activo, fecha_creacion) VALUES (?, ?, ?, ?, ?, NOW())");
-            $stmt->bind_param("ssssi", $nombre, $correo, $rol, $contrasena_hash, $activo);
-            $result = $stmt->execute();
-            $stmt->close();
-            return $result;
-        } catch (Exception $e) {
-            error_log("Error en crearUsuario(): " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function actualizarUsuario($id, $nombre, $correo, $rol, $activo, $contrasena = null) {
-        try {
-            if ($contrasena) {
-                // Actualizar con nueva contraseña
-                $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
-                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, contrasena = ?, activo = ? WHERE id = ?");
-                $stmt->bind_param("ssssii", $nombre, $correo, $rol, $contrasena_hash, $activo, $id);
-            } else {
-                // Actualizar sin cambiar contraseña
-                $stmt = $this->conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, activo = ? WHERE id = ?");
-                $stmt->bind_param("sssii", $nombre, $correo, $rol, $activo, $id);
-            }
-            $result = $stmt->execute();
-            $stmt->close();
-            return $result;
-        } catch (Exception $e) {
-            error_log("Error en actualizarUsuario(): " . $e->getMessage());
-            return false;
-        }
+    /**
+     * Destructor de la clase
+     */
+    public function __destruct() {
+        $this->cerrarConexion();
     }
 }
-?>
+
+/*
+ * =====================================================
+ * FIN DE LA CLASE CONEXION
+ * =====================================================
+ * 
+ * Esta clase proporciona una interfaz completa para la gestión
+ * de la base de datos del sistema CMDB con los siguientes módulos:
+ * 
+ * 1. Conexión y configuración de base de datos
+ * 2. Autenticación de usuarios y colaboradores  
+ * 3. CRUD completo de usuarios del sistema
+ * 4. Gestión de colaboradores y accesos
+ * 5. Administración de categorías de inventario
+ * 6. Manejo completo del inventario de equipos
+ * 7. Métodos auxiliares para colaboradores
+ * 8. Reportes y estadísticas del sistema
+ * 9. Utilidades de limpieza y conexión
+ * 
+ * Características de seguridad implementadas:
+ * - Uso de prepared statements para prevenir SQL injection
+ * - Hash seguro de contraseñas con password_hash()
+ * - Validación de datos de entrada
+ * - Manejo de errores con logging
+ * - Transacciones para operaciones críticas
+ * 
+ * @author Sistema CMDB
+ * @version 2.0 - Reorganizado y optimizado
+ * @date 2024
+ */

@@ -1,27 +1,20 @@
 <?php
-require_once 'conexion.php';
 header('Content-Type: application/json');
 
-// Habilitar errores para debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 if (isset($_GET['action']) && $_GET['action'] === 'getCategorias') {
+    
+    $servername = "localhost";
+    $username = "root";
+    $password = "12345";
+    $dbname = "cmdb";
+    
     try {
-        // Usar conexión directa como backup si la clase falla
-        $servername = "localhost";
-        $username = "root";
-        $password = "12345";
-        $dbname = "cmdb";
-        
         $conn = new mysqli($servername, $username, $password, $dbname);
         
         if ($conn->connect_error) {
             echo json_encode(['error' => 'Error de conexión: ' . $conn->connect_error]);
             exit;
         }
-        
-        $conn->set_charset("utf8mb4");
         
         $sql = "SELECT id, nombre, descripcion FROM categorias ORDER BY nombre ASC";
         $result = $conn->query($sql);
@@ -45,6 +38,5 @@ if (isset($_GET['action']) && $_GET['action'] === 'getCategorias') {
     exit;
 }
 
-// Si no hay acción válida, devolver error
 echo json_encode(['error' => 'Acción no válida']);
 ?>

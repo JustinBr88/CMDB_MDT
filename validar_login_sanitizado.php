@@ -1,69 +1,49 @@
 <?php
-// Iniciar buffer de salida y configurar para no mostrar errores
-ob_start();
-ini_set('display_errors', 0);
+// Configurar headers para JSON y CORS
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+ini_set('display_errors', 0); // No mostrar errores en output
 error_reporting(E_ALL);
 
-// Función para enviar respuesta JSON limpia
-function enviarRespuestaJSON($data) {
-    // Limpiar cualquier output previo
-    if (ob_get_level()) {
-        ob_clean();
-    }
-    
-    // Configurar headers
-    header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-    header('Cache-Control: no-cache, must-revalidate');
-    
-    // Enviar JSON y terminar
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
-    exit;
-}
+// Incluir clase de sanitización
+require_once 'sanitizardatos.php';
 
 // Manejar preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Incluir archivos con manejo de errores
-try {
-    require_once 'sanitizardatos.php';
-} catch (Exception $e) {
-    enviarRespuestaJSON(['success' => false, 'mensaje' => 'Error de configuración del sistema']);
-}
-
 try {
     require_once 'conexion.php';
-} catch (Exception $e) {
-    enviarRespuestaJSON(['success' => false, 'mensaje' => 'Error de conexión a la base de datos']);
-}
 
-try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Sanitizar datos de entrada
         $usuario = SanitizarDatos::sanitizarTexto($_POST['usuario'] ?? '');
         $contrasena = $_POST['contrasena'] ?? ''; // No sanitizar contraseña (puede tener caracteres especiales)
 
         if (empty($usuario) || empty($contrasena)) {
-            enviarRespuestaJSON(['success' => false, 'mensaje' => 'Usuario y contraseña son requeridos']);
+            echo json_encode(['success' => false, 'mensaje' => 'Usuario y contraseña son requeridos']);
+            exit;
         }
 
         // Validar longitud para prevenir ataques
         if (!SanitizarDatos::validarLongitud($usuario, 3, 50)) {
-            enviarRespuestaJSON(['success' => false, 'mensaje' => 'Usuario debe tener entre 3 y 50 caracteres']);
+            echo json_encode(['success' => false, 'mensaje' => 'Usuario debe tener entre 3 y 50 caracteres']);
+            exit;
         }
 
         if (!SanitizarDatos::validarLongitud($contrasena, 4, 255)) {
-            enviarRespuestaJSON(['success' => false, 'mensaje' => 'Contraseña no válida']);
+            echo json_encode(['success' => false, 'mensaje' => 'Contraseña no válida']);
+            exit;
         }
 
         try {
             $conexion = new Conexion();
         } catch (Exception $e) {
-            enviarRespuestaJSON(['success' => false, 'mensaje' => 'Error de conexión a la base de datos']);
+            echo json_encode(['success' => false, 'mensaje' => 'Error de conexión a la base de datos']);
+            exit;
         }
 
         // Primero intenta como usuario/admin
@@ -87,13 +67,13 @@ try {
                 $_SESSION['id'] = $user['id']; // Agregar ID para verificación de roles
                 $_SESSION['foto'] = $user['foto'] ?? '';
                 $_SESSION['tipo'] = 'usuario';
-                
-                enviarRespuestaJSON([
+                echo json_encode([
                     'success' => true, 
                     'mensaje' => 'Login exitoso como usuario',
                     'redirect' => 'Usuario/Home.php',
                     'tipo' => 'usuario'
                 ]);
+                exit;
             }
         } catch (Exception $e) {
             // Log el error pero continúa intentando con colaborador
@@ -121,26 +101,26 @@ try {
                 $_SESSION['colaborador_apellido'] = $colab['apellido'];
                 $_SESSION['colaborador_foto'] = $colab['foto'] ?? '';
                 $_SESSION['colaborador_usuario'] = $colab['usuario'];
-                
-                enviarRespuestaJSON([
+                echo json_encode([
                     'success' => true, 
                     'mensaje' => 'Login exitoso como colaborador',
                     'redirect' => 'colaboradores/portal_colaborador.php',
                     'tipo' => 'colaboradores'
                 ]);
+                exit;
             }
         } catch (Exception $e) {
             error_log("Error validando colaborador: " . $e->getMessage());
         }
 
         // Si ninguno funciona
-        enviarRespuestaJSON(['success' => false, 'mensaje' => 'Usuario o contraseña incorrectos']);
-        
+        echo json_encode(['success' => false, 'mensaje' => 'Usuario o contraseña incorrectos']);
     } else {
-        enviarRespuestaJSON(['success' => false, 'mensaje' => 'Método no permitido']);
+        echo json_encode(['success' => false, 'mensaje' => 'Método no permitido']);
     }
 
 } catch (Exception $e) {
+    echo json_encode(['success' => false, 'mensaje' => 'Error del servidor']);
     error_log("Error general en validar_login.php: " . $e->getMessage());
-    enviarRespuestaJSON(['success' => false, 'mensaje' => 'Error del servidor']);
 }
+?>

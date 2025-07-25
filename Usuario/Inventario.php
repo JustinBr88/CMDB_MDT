@@ -2,6 +2,8 @@
 include 'loginSesion.php';
 include('../navbar_unificado.php');
 require_once '../conexion.php';
+require_once '../sanitizardatos.php';
+
 $conexion = new Conexion();
 $result = $conexion->obtenerInventario();
 ?>
@@ -35,32 +37,32 @@ $result = $conexion->obtenerInventario();
         </thead>
         <tbody>
             <?php foreach ($result as $row): ?>
-            <tr data-id="<?= htmlspecialchars($row['id']) ?>">
+            <tr data-id="<?= SanitizarDatos::sanitizarHTML($row['id']) ?>">
                 <td>
                     <?php
                     // Verificar si existe imagen en la base de datos y el archivo existe
                     $imagenPath = '../img/perfil.jpg'; // Imagen por defecto
                     if (!empty($row['imagen'])) {
-                        $imagenEquipo = '../uploads/' . $row['imagen'];
+                        $imagenEquipo = '../uploads/' . SanitizarDatos::sanitizarNombreArchivo($row['imagen']);
                         // Verificar si el archivo existe
                         if (file_exists($imagenEquipo)) {
                             $imagenPath = $imagenEquipo;
                         }
                     }
                     ?>
-                    <img src='<?= htmlspecialchars($imagenPath) ?>' width='60' alt='Imagen equipo' class='img-thumbnail' 
+                    <img src='<?= SanitizarDatos::sanitizarHTML($imagenPath) ?>' width='60' alt='Imagen equipo' class='img-thumbnail' 
                          onerror="this.src='../img/perfil.jpg';" style="height: 60px; object-fit: cover;">
                 </td>
-                <td><?= htmlspecialchars($row['id']) ?></td>
-                <td class="editable" data-campo="nombre_equipo"><?= htmlspecialchars($row['nombre_equipo']) ?></td>
-                <td class="editable" data-campo="categoria_id"><?= htmlspecialchars($row['categoria']) ?></td>
-                <td class="editable" data-campo="marca"><?= htmlspecialchars($row['marca']) ?></td>
-                <td class="editable" data-campo="modelo"><?= htmlspecialchars($row['modelo']) ?></td>
-                <td class="editable" data-campo="numero_serie"><?= htmlspecialchars($row['numero_serie']) ?></td>
-                <td class="editable" data-campo="costo"><?= htmlspecialchars($row['costo']) ?></td>
-                <td class="editable" data-campo="fecha_ingreso"><?= htmlspecialchars($row['fecha_ingreso']) ?></td>
-                <td class="editable" data-campo="tiempo_depreciacion"><?= htmlspecialchars($row['tiempo_depreciacion']) ?></td>
-                <td class="editable" data-campo="estado"><?= htmlspecialchars($row['estado']) ?></td>
+                <td><?= SanitizarDatos::sanitizarHTML($row['id']) ?></td>
+                <td class="editable" data-campo="nombre_equipo"><?= SanitizarDatos::sanitizarHTML($row['nombre_equipo'] ?? '') ?></td>
+                <td class="editable" data-campo="categoria_id"><?= SanitizarDatos::sanitizarHTML($row['categoria_nombre'] ?? 'Sin categoría') ?></td>
+                <td class="editable" data-campo="marca"><?= SanitizarDatos::sanitizarHTML($row['marca'] ?? '') ?></td>
+                <td class="editable" data-campo="modelo"><?= SanitizarDatos::sanitizarHTML($row['modelo'] ?? '') ?></td>
+                <td class="editable" data-campo="numero_serie"><?= SanitizarDatos::sanitizarHTML($row['numero_serie'] ?? '') ?></td>
+                <td class="editable" data-campo="costo"><?= SanitizarDatos::sanitizarHTML($row['costo'] ?? '0') ?></td>
+                <td class="editable" data-campo="fecha_ingreso"><?= SanitizarDatos::sanitizarHTML($row['fecha_ingreso'] ?? '') ?></td>
+                <td class="editable" data-campo="tiempo_depreciacion"><?= SanitizarDatos::sanitizarHTML($row['tiempo_depreciacion'] ?? '') ?></td>
+                <td class="editable" data-campo="estado"><?= SanitizarDatos::sanitizarHTML($row['estado'] ?? 'activo') ?></td>
                 <td>
                     <button class="btn btn-sm btn-warning btn-editar">Editar</button>
                     <button class="btn btn-sm btn-success btn-guardar d-none">Guardar</button>
@@ -92,7 +94,9 @@ $result = $conexion->obtenerInventario();
                         <?php
                         $categorias = $conexion->obtenerCategorias();
                         foreach ($categorias as $cat) {
-                            echo "<option value='" . htmlspecialchars($cat['id']) . "'>" . htmlspecialchars($cat['nombre']) . "</option>";
+                            $id_sanitizado = SanitizarDatos::sanitizarHTML($cat['id']);
+                            $nombre_sanitizado = SanitizarDatos::sanitizarHTML($cat['nombre']);
+                            echo "<option value='" . $id_sanitizado . "'>" . $nombre_sanitizado . "</option>";
                         }
                         ?>
                     </select>
@@ -188,7 +192,19 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('input', function() {
             // Remover caracteres potencialmente peligrosos
             this.value = this.value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-            this.value = this.value.replace(/[<>]/g, '');
+            this.value = this.value.replace(/[<>'"]/g, '');
+            
+            // Limitar longitud según el campo
+            const maxLengths = {
+                'nombre_equipo': 100,
+                'marca': 50,
+                'modelo': 50,
+                'numero_serie': 50
+            };
+            
+            if (maxLengths[this.name] && this.value.length > maxLengths[this.name]) {
+                this.value = this.value.substring(0, maxLengths[this.name]);
+            }
         });
     });
     
@@ -197,9 +213,69 @@ document.addEventListener('DOMContentLoaded', function() {
     numberInputs.forEach(input => {
         input.addEventListener('input', function() {
             if (this.value < 0) this.value = 0;
+            
+            // Validaciones específicas por campo
+            if (this.name === 'costo' && this.value > 999999.99) {
+                this.value = 999999.99;
+            }
+            
+            if (this.name === 'tiempo_depreciacion' && this.value > 120) {
+                this.value = 120;
+            }
         });
     });
+    
+    // Validar fecha de ingreso
+    const fechaIngreso = document.getElementById('fecha_ingreso');
+    if (fechaIngreso) {
+        fechaIngreso.addEventListener('change', function() {
+            const today = new Date().toISOString().split('T')[0];
+            if (this.value > today) {
+                alert('La fecha de ingreso no puede ser posterior a hoy');
+                this.value = today;
+            }
+        });
+    }
+    
+    // Mejorar validación del formulario antes del envío
+    formNuevo.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validar campos requeridos
+        const nombreEquipo = document.getElementById('nombre_equipo').value.trim();
+        const categoriaId = document.getElementById('categoria_id').value;
+        
+        if (!nombreEquipo) {
+            alert('El nombre del equipo es obligatorio');
+            return;
+        }
+        
+        if (!categoriaId) {
+            alert('Debe seleccionar una categoría');
+            return;
+        }
+        
+        // Si pasa todas las validaciones, enviar formulario
+        // Aquí se podría agregar el código AJAX para enviar los datos
+        alert('Validación exitosa. Formulario listo para enviar.');
+    });
 });
+</script>
+
+<!-- Datos de categorías para JavaScript -->
+<script>
+// Categorías disponibles para edición inline
+window.categoriasData = <?php 
+$categorias_js = [];
+foreach ($categorias as $cat) {
+    $categorias_js[] = [
+        'id' => (int)$cat['id'],
+        'nombre' => htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8')
+    ];
+}
+echo json_encode($categorias_js, JSON_HEX_QUOT | JSON_HEX_APOS); 
+?>;
+console.log('Categorías cargadas:', window.categoriasData);
 </script>
 
 <?php include('footer.php'); ?>

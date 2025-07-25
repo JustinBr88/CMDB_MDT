@@ -36,6 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['solicitar_donacion'])
 // Obtener equipos asignados al colaborador
 $equipos_asignados = $conexion->obtenerEquiposAsignadosColaborador($colaborador_id);
 
+// Debug temporal - mostrar información
+echo "<!-- DEBUG: Colaborador ID: $colaborador_id -->";
+echo "<!-- DEBUG: Total equipos asignados: " . count($equipos_asignados) . " -->";
+foreach ($equipos_asignados as $eq) {
+    echo "<!-- DEBUG: Equipo: {$eq['nombre_equipo']}, Estado: {$eq['estado_asignacion']} -->";
+}
+
+// Filtrar solo equipos con estado 'asignado' para donación
+$equipos_disponibles_donacion = array_filter($equipos_asignados, function($equipo) {
+    return $equipo['estado_asignacion'] === 'asignado';
+});
+
+echo "<!-- DEBUG: Equipos disponibles para donación: " . count($equipos_disponibles_donacion) . " -->";
+
 include('../navbar_unificado.php');
 ?>
 
@@ -70,7 +84,21 @@ include('../navbar_unificado.php');
                 </ul>
             </div>
             
-            <?php if (empty($equipos_asignados)): ?>
+            <!-- DEBUG: Información visible para usuario -->
+            <div class="alert alert-warning" style="font-size: 12px;">
+                <strong>🔧 Debug Info:</strong> 
+                Colaborador ID: <?= $colaborador_id ?> | 
+                Equipos asignados: <?= count($equipos_asignados) ?> | 
+                Disponibles para donación: <?= count($equipos_disponibles_donacion) ?>
+                <?php if (count($equipos_asignados) > 0): ?>
+                    <br><strong>Estados:</strong>
+                    <?php foreach ($equipos_asignados as $eq): ?>
+                        <?= $eq['nombre_equipo'] ?> (<?= $eq['estado_asignacion'] ?>),
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <?php if (empty($equipos_disponibles_donacion)): ?>
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i> No tienes equipos asignados disponibles para donación.
                     <a href="portal_colaborador.php" class="btn btn-primary btn-sm ms-2">Volver al Portal</a>
@@ -78,7 +106,7 @@ include('../navbar_unificado.php');
             <?php else: ?>
                 <div class="card">
                     <div class="card-header bg-success text-white">
-                        <h5><i class="fas fa-laptop"></i> Mis Equipos Disponibles para Donación (<?= count($equipos_asignados) ?>)</h5>
+                        <h5><i class="fas fa-laptop"></i> Mis Equipos Disponibles para Donación (<?= count($equipos_disponibles_donacion) ?>)</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -95,7 +123,7 @@ include('../navbar_unificado.php');
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($equipos_asignados as $equipo): ?>
+                                    <?php foreach ($equipos_disponibles_donacion as $equipo): ?>
                                     <tr>
                                         <td>
                                             <?php 

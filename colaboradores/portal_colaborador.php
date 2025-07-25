@@ -14,9 +14,13 @@ $conexion = new Conexion();
 
 // Recargar datos actualizados del colaborador
 $colab = $conexion->obtenerColaboradorPorId($_SESSION['colaborador_id']);
+$colaborador_id = $_SESSION['colaborador_id'];
 
 // Registrar acceso en historial
 $conexion->registrarAccesoColaborador($colab['id']);
+
+// Obtener equipos asignados usando el método estandarizado
+$equipos_asignados = $conexion->obtenerEquiposAsignadosColaborador($colaborador_id);
 ?>
 <?php include('../navbar_unificado.php'); ?>
 
@@ -74,14 +78,8 @@ $conexion->registrarAccesoColaborador($colab['id']);
           </thead>
           <tbody>
             <?php
-            $res = $conexion->getConexion()->query(
-              "SELECT i.nombre_equipo, i.marca, i.modelo, i.numero_serie, a.fecha_asignacion, a.estado as estado_asignacion
-               FROM inventario i
-               JOIN asignaciones a ON i.id = a.inventario_id
-               WHERE a.colaborador_id = {$colab['id']} AND a.estado IN ('asignado','dañado','donado')"
-            );
-            if ($res->num_rows > 0) {
-              while($eq = $res->fetch_assoc()) {
+            if (count($equipos_asignados) > 0) {
+              foreach($equipos_asignados as $eq) {
                 echo "<tr>
                   <td>" . htmlspecialchars($eq['nombre_equipo']) . "</td>
                   <td>" . htmlspecialchars($eq['marca']) . "</td>

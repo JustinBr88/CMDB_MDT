@@ -2,6 +2,7 @@
 session_start();
 include '../navbar_unificado.php';
 require_once '../conexion.php';
+require_once '../sanitizardatos.php';
 
 // Verificar sesión
 if (!isset($_SESSION['id']) || !isset($_SESSION['logeado'])) {
@@ -13,14 +14,15 @@ $usuario_id = $_SESSION['id'];
 
 try {
     $conexion = new Conexion();
-    $mysqli = $conexion->getConexion();
+    $conn = $conexion->getConexion();
     
     // Obtener datos del usuario
-    $stmt = $mysqli->prepare("SELECT nombre, correo, rol, fecha_creacion FROM usuarios WHERE id = ?");
+    $stmt = $conn->prepare("SELECT nombre, correo, rol, fecha_creacion FROM usuarios WHERE id = ?");
     $stmt->bind_param("i", $usuario_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $usuario = $result->fetch_assoc();
+    $stmt->close();
     
     if (!$usuario) {
         header("Location: ../Login.php");
@@ -28,7 +30,8 @@ try {
     }
     
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    error_log("Error en Perfil.php: " . $e->getMessage());
+    echo "Error de conexión. Intente nuevamente.";
     exit();
 }
 ?>
@@ -73,13 +76,13 @@ try {
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label"><strong>Nombre:</strong></label>
-                                <p class="form-control-static"><?= htmlspecialchars($usuario['nombre']) ?></p>
+                                <p class="form-control-static"><?= SanitizarDatos::sanitizarHTML($usuario['nombre']) ?></p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label"><strong>Correo Electrónico:</strong></label>
-                                <p class="form-control-static"><?= htmlspecialchars($usuario['correo']) ?></p>
+                                <p class="form-control-static"><?= SanitizarDatos::sanitizarHTML($usuario['correo']) ?></p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -95,7 +98,7 @@ try {
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label"><strong>Fecha de Registro:</strong></label>
-                                <p class="form-control-static"><?= date('d/m/Y H:i', strtotime($usuario['fecha_creacion'])) ?></p>
+                                <p class="form-control-static"><?= SanitizarDatos::sanitizarHTML(date('d/m/Y H:i', strtotime($usuario['fecha_creacion']))) ?></p>
                             </div>
                         </div>
                     </div>
@@ -180,16 +183,28 @@ document.getElementById('form-foto-perfil').addEventListener('submit', function(
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Recargar la imagen del navbar
-            location.reload();
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        mostrarMensaje(data.message);
+        return response.text();
+    })
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                // Recargar la imagen del navbar
+                location.reload();
+            }
+            mostrarMensaje(data.message);
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', jsonError);
+            console.error('Response text:', text);
+            mostrarMensaje('Error en la respuesta del servidor');
+        }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Fetch error:', error);
         mostrarMensaje('Error al subir la foto');
     });
 });
@@ -212,16 +227,30 @@ document.getElementById('form-cambiar-password').addEventListener('submit', func
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        mostrarMensaje(data.message);
-        if (data.success) {
-            this.reset();
+    .then(response => {
+        // Verificar que la respuesta sea válida
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(text => {
+        try {
+            // Intentar parsear como JSON
+            const data = JSON.parse(text);
+            mostrarMensaje(data.message);
+            if (data.success) {
+                this.reset();
+            }
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', jsonError);
+            console.error('Response text:', text);
+            mostrarMensaje('Error en la respuesta del servidor');
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        mostrarMensaje('Error al cambiar la contraseña');
+        console.error('Fetch error:', error);
+        mostrarMensaje('Error de conexión al servidor');
     });
 });
 

@@ -1,21 +1,29 @@
 <?php 
 include('../navbar_unificado.php'); 
 require_once('../conexion.php');
+require_once('../sanitizardatos.php');
 
 $conexion = new Conexion();
 $mensaje = '';
 
 // Procesar formulario de creación
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear'])) {
-    $nombre = trim($_POST['nombre']);
-    $correo = trim($_POST['correo']);
-    $rol = $_POST['rol'];
-    $contrasena = $_POST['contrasena'];
-    $activo = (int)$_POST['activo'];
+    // Sanitizar datos de entrada
+    $nombre = SanitizarDatos::sanitizarTexto($_POST['nombre'] ?? '');
+    $correo = SanitizarDatos::sanitizarEmail($_POST['correo'] ?? '');
+    $rol = SanitizarDatos::sanitizarTexto($_POST['rol'] ?? '');
+    $contrasena = $_POST['contrasena'] ?? ''; // No sanitizar contraseña
+    $activo = SanitizarDatos::sanitizarEntero($_POST['activo'] ?? 0);
     
     // Validar campos
-    if (empty($nombre) || empty($correo) || empty($contrasena)) {
-        $mensaje = "<div class='alert alert-danger'>Todos los campos obligatorios deben estar llenos.</div>";
+    if (empty($nombre) || !$correo || empty($contrasena)) {
+        $mensaje = "<div class='alert alert-danger'>Todos los campos obligatorios deben estar llenos y ser válidos.</div>";
+    } elseif (!SanitizarDatos::validarLongitud($nombre, 2, 100)) {
+        $mensaje = "<div class='alert alert-danger'>El nombre debe tener entre 2 y 100 caracteres.</div>";
+    } elseif (!SanitizarDatos::validarLongitud($contrasena, 6, 255)) {
+        $mensaje = "<div class='alert alert-danger'>La contraseña debe tener al menos 6 caracteres.</div>";
+    } elseif (!in_array($rol, ['admin', 'colab'])) {
+        $mensaje = "<div class='alert alert-danger'>Rol no válido.</div>";
     } else {
         // Verificar si el correo ya existe
         $usuarioExiste = $conexion->verificarUsuarioExiste($correo);
@@ -35,15 +43,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear'])) {
 
 // Procesar formulario de modificación
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['modificar'])) {
-    $id = (int)$_POST['id'];
-    $nombre = trim($_POST['nombre']);
-    $correo = trim($_POST['correo']);
-    $rol = $_POST['rol'];
-    $activo = (int)$_POST['activo'];
+    // Sanitizar datos de entrada
+    $id = SanitizarDatos::sanitizarEntero($_POST['id'] ?? 0);
+    $nombre = SanitizarDatos::sanitizarTexto($_POST['nombre'] ?? '');
+    $correo = SanitizarDatos::sanitizarEmail($_POST['correo'] ?? '');
+    $rol = SanitizarDatos::sanitizarTexto($_POST['rol'] ?? '');
+    $activo = SanitizarDatos::sanitizarEntero($_POST['activo'] ?? 0);
     
     // Validar campos
-    if (empty($nombre) || empty($correo)) {
-        $mensaje = "<div class='alert alert-danger'>Nombre y correo son obligatorios.</div>";
+    if (!$id || empty($nombre) || !$correo) {
+        $mensaje = "<div class='alert alert-danger'>Datos no válidos.</div>";
+    } elseif (!SanitizarDatos::validarLongitud($nombre, 2, 100)) {
+        $mensaje = "<div class='alert alert-danger'>El nombre debe tener entre 2 y 100 caracteres.</div>";
+    } elseif (!in_array($rol, ['admin', 'colab'])) {
+        $mensaje = "<div class='alert alert-danger'>Rol no válido.</div>";
     } else {
         // Verificar si el correo ya existe (excluyendo el usuario actual)
         $usuarioExiste = $conexion->verificarCorreoDuplicado($correo, $id);

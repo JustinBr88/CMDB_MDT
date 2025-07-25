@@ -65,9 +65,9 @@ try {
         $stmt->execute();
         $stmt->close();
         
-        // 3. Actualizar estado de la solicitud a "aprobada"
+        // 3. Actualizar estado de la solicitud a "aceptada"
         $stmt = $conexion->getConexion()->prepare("
-            UPDATE solicitudes SET estado = 'aprobada', fecha_respuesta = NOW() WHERE id = ?
+            UPDATE solicitudes SET estado = 'aceptada', fecha_respuesta = NOW() WHERE id = ?
         ");
         $stmt->bind_param("i", $solicitud_id);
         $stmt->execute();

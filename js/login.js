@@ -36,7 +36,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         } catch (parseError) {
             console.error('Error parsing JSON:', parseError);
             console.error('Respuesta recibida:', text);
-            alert('Error: Respuesta del servidor no es JSON válida');
+            
+            // Verificar si hay caracteres PHP mezclados
+            if (text.includes('?>') || text.includes('<?')) {
+                alert('Error del servidor: Respuesta contiene código PHP. Revise el archivo validar_login.php');
+            } else {
+                alert('Error: Respuesta del servidor no es JSON válida');
+            }
             return;
         }
 

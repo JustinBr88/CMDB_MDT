@@ -28,11 +28,20 @@ include('../navbar_unificado.php');
             foreach ($result as $row) {
                 echo "<tr data-id='{$row['id']}' data-nombre='{$row['nombre_equipo']}'>
                     <td>";
+                
+                // Verificar si existe imagen en la base de datos y el archivo existe
+                $imagenPath = '../img/perfil.jpg'; // Imagen por defecto
                 if (!empty($row['imagen'])) {
-                    echo "<img src='../uploads/{$row['imagen']}' width='60'>";
-                } else {
-                    echo "<img src='../img/equipo.jpg' width='60'>";
+                    $imagenEquipo = '../uploads/' . $row['imagen'];
+                    // Verificar si el archivo existe
+                    if (file_exists($imagenEquipo)) {
+                        $imagenPath = $imagenEquipo;
+                    }
                 }
+                
+                echo "<img src='" . htmlspecialchars($imagenPath) . "' width='60' alt='Imagen equipo' class='img-thumbnail' 
+                           onerror=\"this.src='../img/perfil.jpg';\" style=\"height: 60px; object-fit: cover;\">";
+                
                 echo "</td>
                     <td>{$row['nombre_equipo']}</td>
                     <td>{$row['categoria']}</td>

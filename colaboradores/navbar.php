@@ -4,8 +4,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es              <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-heart"></i> Donaciones
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
+              </ul>
+            </li>
+          </ul>>
   <meta charset="utf-8" />
   <title>MD Tecnología</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -118,7 +124,6 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li><a class="dropdown-item" href="solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
               </ul>
             </li>
-            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['colaborador_logeado']) && $_SESSION['colaborador_logeado'] === true): ?>
