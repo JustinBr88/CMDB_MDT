@@ -1,8 +1,8 @@
 <?php
 class Conexion {
     private $servername = "localhost";
-    private $username = "root";
-    private $password = "1234";
+    private $username = "labo2fa";
+    private $password = "GoLoNdRiNa56(/)";
     private $dbname = "cmdb";
     private $port = 3306;
     private $conn;
