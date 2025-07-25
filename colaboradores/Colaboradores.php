@@ -1,8 +1,14 @@
 <?php 
-include 'loginSesionColaborador.php';
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'colab') {
+    header('Location: ../Usuario/Login.php');
+    exit;
+}
+
 include(__DIR__ . '/../navbar.php');
 require_once(__DIR__ . '/../conexion.php');
 $conexion = new Conexion();
+
 
 // --- Procesamiento del formulario ---
 $msg = '';

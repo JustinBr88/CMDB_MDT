@@ -1,8 +1,3 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,17 +8,11 @@ if (session_status() === PHP_SESSION_NONE) {
   <link href="../img/favicon.ico" rel="icon" />
   <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
     .profile-pic-navbar-lg {
@@ -57,7 +46,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <header>
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex" style="margin-right: 0px">
       <div class="col-lg-4">
-        <a href="../Usuario/Home.php" class="text-decoration-none">
+        <a href="<?php echo (isset($_SESSION['rol']) && $_SESSION['rol'] === 'colab') ? '../colaboradores/portal_colaborador.php' : '../Usuario/Home.php'; ?>" class="text-decoration-none">
           <img src="../img/logo.png" alt="logo" />
         </a>
       </div>
@@ -77,14 +66,12 @@ if (session_status() === PHP_SESSION_NONE) {
       <div class="col-lg-4 col-6 text-right">
         <div class="profile-pic-wrapper">
           <?php
-            // Si el usuario está logueado y tiene foto, mostrarla. Sino, mostrar la default.
-            if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['foto'])) {
+            if(isset($_SESSION['foto']) && !empty($_SESSION['foto'])) {
                 $foto = $_SESSION['foto'];
             } else {
-                $foto = '../img/default_profile.png';
+                $foto = '../img/perfil.jpg';
             }
-            // Nombre del usuario, si está logueado
-            if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true && !empty($_SESSION['usuario'])) {
+            if(isset($_SESSION['usuario']) && !empty($_SESSION['usuario'])) {
                 $nombreUsuario = htmlspecialchars($_SESSION['usuario']);
             } else {
                 $nombreUsuario = "Inicia sesión para continuar";
@@ -100,29 +87,41 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand d-lg-none" href="Home.php">MD Tecnología</a>
+        <a class="navbar-brand d-lg-none" href="<?php echo (isset($_SESSION['rol']) && $_SESSION['rol'] === 'colab') ? '../colaboradores/portal_colaborador.php' : '../Usuario/Home.php'; ?>">MD Tecnología</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
           aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item"><a class="nav-link" href="Home.php"><i class="fa fa-home"></i> Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="InventarioColab.php"><i class="fa fa-boxes"></i> Inventario</a></li>
-            <li class="nav-item"><a class="nav-link" href="SolicitudesColab.php"><i class="fa fa-list"></i> Solicitudes</a></li>
-            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
+            <?php if(isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin'): ?>
+              <li class="nav-item"><a class="nav-link" href="../Usuario/Home.php"><i class="fa fa-home"></i> Inicio</a></li>
+              <li class="nav-item"><a class="nav-link" href="../Usuario/Inventario.php"><i class="fa fa-boxes"></i> Inventario</a></li>
+              <li class="nav-item"><a class="nav-link" href="../Usuario/Categorias.php"><i class="fa fa-list"></i> Categorías</a></li>
+              <li class="nav-item"><a class="nav-link" href="../Usuario/Asignaciones.php"><i class="fa fa-users"></i> Asignaciones</a></li>
+              <li class="nav-item"><a class="nav-link" href="../Usuario/Usuarios.php"><i class="fa fa-user-cog"></i> Usuarios</a></li>
+            <?php elseif(isset($_SESSION['rol']) && $_SESSION['rol'] === 'colab'): ?>
+              <li class="nav-item"><a class="nav-link" href="../colaboradores/portal_colaborador.php"><i class="fa fa-home"></i> Inicio</a></li>
+              <li class="nav-item"><a class="nav-link" href="../colaboradores/Colaboradores.php"><i class="fa fa-user"></i> Perfil</a></li>
+              <li class="nav-item"><a class="nav-link" href="../colaboradores/InventarioColab.php"><i class="fa fa-boxes"></i> Inventario Disponible</a></li>
+              <!-- Agrega más links de colaborador aquí si lo necesitas -->
+            <?php endif; ?>
           </ul>
           <ul class="navbar-nav ml-auto">
-            <?php if(isset($_SESSION['logeado']) && $_SESSION['logeado'] === true): ?>
+            <?php if(isset($_SESSION['rol'])): ?>
               <li class="nav-item">
-                <a class="nav-link text-light" href="/Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+                <?php if($_SESSION['rol'] === 'admin'): ?>
+                  <a class="nav-link text-light" href="Perfil.php"><i class="fa fa-user"></i> Perfil</a>
+                <?php else: ?>
+                  <a class="nav-link text-light" href="../colaboradores/Colaboradores.php"><i class="fa fa-user"></i> Perfil</a>
+                <?php endif; ?>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-danger font-weight-bold" href="/logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+                <a class="nav-link text-danger font-weight-bold" href="../logout.php"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link text-primary font-weight-bold" href="../Usuario/Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
+                <a class="nav-link text-primary font-weight-bold" href="../Login.php"><i class="fa fa-sign-in-alt"></i> Iniciar sesión</a>
               </li>
             <?php endif; ?>
           </ul>

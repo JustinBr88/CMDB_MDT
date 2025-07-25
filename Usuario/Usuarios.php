@@ -1,4 +1,12 @@
-<?php include('navbar.php'); ?>
+<?php 
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header('Location: Login.php');
+    exit;
+}
+
+include('../navbar.php');
+?>
 <div class="container mt-5">
     <h2>Usuarios del Sistema</h2>
     <!-- Formulario de Alta -->
@@ -46,7 +54,7 @@
         </thead>
         <tbody>
             <?php
-            require_once('conexion.php');
+            require_once('../conexion.php');
             $conexion = new Conexion();
             $result = $conexion->obtenerUsuarios();
             foreach ($result as $row) {

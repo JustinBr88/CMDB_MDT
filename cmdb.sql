@@ -22,7 +22,7 @@ CREATE TABLE usuarios (
   nombre VARCHAR(100) NOT NULL,
   correo VARCHAR(100) NOT NULL UNIQUE,
   contrasena VARCHAR(255) NOT NULL,
-  rol ENUM('admin','tecnico') DEFAULT 'tecnico',
+  rol ENUM('admin','colab') DEFAULT 'colab',
   activo TINYINT(1) DEFAULT 1,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -153,7 +153,7 @@ INSERT INTO departamentos (nombre, ubicacion) VALUES ('Sistemas', 'Planta Baja')
 
 -- Usuario colaborador (en ambas tablas)
 INSERT INTO usuarios (nombre, correo, contrasena, rol, activo)
-VALUES ('Juan Pérez', 'colaborador@midominio.com', 'colaborador123', 'tecnico', 1);
+VALUES ('Juan Pérez', 'colaborador@midominio.com', '$2a$12$KQx/izQ4wb5vKAdk32EdjOm61zK2T3AchFNU1MCFrb0DRTePnH.xG', 'colab', 1);
 
 -- Colaborador vinculado (puedes poner el mismo correo y un departamento_id válido)
 INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
@@ -161,11 +161,8 @@ VALUES ('Juan', 'Pérez', 'C123456', 'juan.jpg', 'Calle 1 #123', 'Oficina A', '5
 
 -- Usuario administrador
 INSERT INTO usuarios (nombre, correo, contrasena, rol, activo)
-VALUES ('Ana García', 'admin@midominio.com', 'admin123', 'admin', 1);
+VALUES ('Ana García', 'admin@midominio.com', '$2a$12$Pwe/s1iED4iFzrSkKm74veYUzJoimXyfus2q9QB7Opt2ZDKPX26Sa', 'admin', 1);
 
--- (Opcional) Si quieres registrar a Ana como colaboradora también (por ejemplo, si los admins pueden ser colaboradores)
-INSERT INTO colaboradores (nombre, apellido, identificacion, foto, direccion, ubicacion, telefono, correo, departamento_id, activo)
-VALUES ('Ana', 'García', 'A654321', 'ana.jpg', 'Calle 2 #456', 'Oficina B', '5559876543', 'admin@midominio.com', 1, 1);
 
 ALTER TABLE solicitudes
 ADD COLUMN motivo TEXT AFTER estado,

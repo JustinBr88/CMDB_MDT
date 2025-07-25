@@ -1,5 +1,9 @@
-<?php 
-include('loginSesion.php'); // Descomentado para verificar sesión
+<?php
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header('Location: Login.php');
+    exit;
+}
 require_once('../conexion.php');
 
 $conexion = new Conexion();
@@ -77,7 +81,7 @@ if ($es_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-include('navbar.php');
+include('../navbar.php');
 ?>
 
 <div class="container mt-5">

@@ -1,4 +1,37 @@
-<?php include('navbar.php'); ?>
+<?php
+session_start();
+require_once 'conexion.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $usuario = $_POST['usuario'];
+    $password = $_POST['password'];
+
+    // Primero intenta validar como usuario administrador
+    $conexion = new Conexion();
+    $admin = $conexion->validarUsuario($usuario, $password);
+    if ($admin) {
+        $_SESSION['usuario'] = $usuario;
+        $_SESSION['rol'] = 'admin';
+        header('Location: ../Home.php');
+        exit;
+    }
+
+    // Si no es admin, intenta validar como colaborador
+    $colaborador = $conexion->validarColaborador($usuario, $password);
+    if ($colaborador) {
+        $_SESSION['usuario'] = $usuario;
+        $_SESSION['rol'] = 'colab';
+        header('Location: ../colaboradores/portal_colaborador.php');
+        exit;
+    }
+
+    // Si no es ninguno, regresa al login con error
+    header('Location: login.php?error=1');
+    exit;
+}
+?>
+
+<?php include(__DIR__ . '/../navbar.php'); ?>
 <!-- Breadcrumb Start -->
 <div class="container-fluid">
   <div class="row px-xl-5">
@@ -20,6 +53,7 @@
         <input
           type="text"
           id="username"
+          name="usuario"
           class="form-control"
           placeholder="Correo / Usuario"
           required
@@ -29,6 +63,7 @@
         <input
           type="password"
           id="password"
+          name="password"
           class="form-control"
           placeholder="Contraseña"
           required

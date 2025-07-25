@@ -1,6 +1,12 @@
 <?php 
+session_start();
+if (!isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'colab') {
+    header('Location: ../Usuario/Login.php');
+    exit;
+}
+
 require_once '../vendor/autoload.php';
-include('navbar.php'); 
+include(__DIR__ . '/../navbar.php'); 
 ?>
 <div class="container mt-5">
     <h2>Inventario disponible para solicitud</h2>

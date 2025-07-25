@@ -1,6 +1,12 @@
 <?php 
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header('Location: Login.php');
+    exit;
+}
+
 require_once '../vendor/autoload.php';
-include('navbar.php'); 
+include('../navbar.php'); 
 include('../conexion.php');
 $conexion = new Conexion();
 

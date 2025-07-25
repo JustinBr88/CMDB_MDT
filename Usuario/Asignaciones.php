@@ -1,5 +1,12 @@
 <?php 
-include('navbar.php'); 
+
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header('Location: Login.php');
+    exit;
+}
+
+include('../navbar.php'); 
 include('../conexion.php');
 $conexion = new Conexion();
 

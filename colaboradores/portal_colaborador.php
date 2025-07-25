@@ -1,13 +1,11 @@
 <?php
 session_start();
-include 'loginSesionColaborador.php';
-require_once(__DIR__ . '/../conexion.php');
-
-// Validación de sesión colaborador
-if (!isset($_SESSION['colaborador_logeado']) || !$_SESSION['colaborador_logeado']) {
-    header('Location: LoginColaborador.php');
+if (!isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'colab') {
+    header('Location: ../Usuario/Login.php');
     exit;
 }
+
+require_once(__DIR__ . '/../conexion.php');
 $conexion = new Conexion();
 
 // --- Edición de perfil ---

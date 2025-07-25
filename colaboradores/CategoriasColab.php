@@ -1,5 +1,5 @@
 <?php include('loginSesion.php'); ?>
-<?php include('navbar.php'); ?>
+<?php include(__DIR__ . '/../navbar.php'); ?>
 <div class="container mt-5">
     <h2>Categorías</h2>
     <!-- Formulario de Alta -->

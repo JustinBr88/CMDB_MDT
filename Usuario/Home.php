@@ -1,6 +1,12 @@
-<?php include 'loginSesion.php';
-      include('navbar.php'); ?>
+<?php
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header('Location: Login.php');
+    exit;
+}
 
+include('../navbar.php');
+?>
     <!-- Carousel Start -->
     <div class="container-fluid mb-3">
       <div class="px-xl-5">
