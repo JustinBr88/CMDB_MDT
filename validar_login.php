@@ -120,13 +120,16 @@ try {
                 $_SESSION['colaborador_nombre'] = $colab['nombre'];
                 $_SESSION['colaborador_apellido'] = $colab['apellido'];
                 $_SESSION['colaborador_foto'] = $colab['foto'] ?? '';
-                $_SESSION['colaborador_usuario'] = $colab['usuario'];
+                $_SESSION['colaborador_usuario'] = $colab['correo']; // Usar correo como usuario
+                
+                // Log para debug
+                error_log("Login colaborador exitoso - ID: " . $colab['id'] . ", Nombre: " . $colab['nombre']);
                 
                 enviarRespuestaJSON([
                     'success' => true, 
                     'mensaje' => 'Login exitoso como colaborador',
                     'redirect' => 'colaboradores/portal_colaborador.php',
-                    'tipo' => 'colaboradores'
+                    'tipo' => 'colaborador'
                 ]);
             }
         } catch (Exception $e) {

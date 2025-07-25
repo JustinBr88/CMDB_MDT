@@ -225,8 +225,15 @@ class Conexion {
      * Registrar acceso de colaborador para auditoría
      */
     public function registrarAccesoColaborador($colaborador_id) {
-        $stmt = $this->conn->prepare("UPDATE colaboradores SET ultimo_acceso = NOW() WHERE id = ?");
-        $stmt->bind_param("i", $colaborador_id);
+        // Registrar en la tabla de historial de accesos
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+        
+        $stmt = $this->conn->prepare("
+            INSERT INTO historial_accesos_colaborador (colaborador_id, fecha_hora, ip, user_agent) 
+            VALUES (?, NOW(), ?, ?)
+        ");
+        $stmt->bind_param("iss", $colaborador_id, $ip, $user_agent);
         $stmt->execute();
         $stmt->close();
     }
@@ -234,22 +241,42 @@ class Conexion {
     /**
      * Validar credenciales de colaborador
      */
-    public function validarColaborador($correo, $contrasena) {
+    public function validarColaborador($usuario_o_correo, $contrasena) {
+        // Primero buscar al colaborador, tanto por correo como por nombre de usuario
         $stmt = $this->conn->prepare("
-            SELECT c.*, d.nombre as departamento_nombre 
+            SELECT c.*, d.nombre as departamento_nombre, u.correo as usuario_correo, u.nombre as usuario_nombre
             FROM colaboradores c
             LEFT JOIN departamentos d ON c.departamento_id = d.id
-            WHERE c.correo = ? AND c.activo = 1
+            LEFT JOIN usuarios u ON c.correo = u.correo AND u.rol = 'colab' AND u.activo = 1
+            WHERE c.activo = 1 AND (c.correo = ? OR u.nombre = ?)
         ");
-        $stmt->bind_param("s", $correo);
+        $stmt->bind_param("ss", $usuario_o_correo, $usuario_o_correo);
         $stmt->execute();
         $result = $stmt->get_result();
         $colaborador = $result->fetch_assoc();
         $stmt->close();
         
-        if ($colaborador && password_verify($contrasena, $colaborador['contrasena'])) {
-            return $colaborador;
+        if ($colaborador) {
+            // Verificar la contraseña en la tabla usuarios usando el correo del colaborador
+            $stmt = $this->conn->prepare("
+                SELECT contrasena, nombre, correo
+                FROM usuarios 
+                WHERE (correo = ? OR nombre = ?) AND rol = 'colab' AND activo = 1
+            ");
+            $stmt->bind_param("ss", $usuario_o_correo, $usuario_o_correo);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $usuario = $result->fetch_assoc();
+            $stmt->close();
+            
+            if ($usuario && password_verify($contrasena, $usuario['contrasena'])) {
+                // Agregar información del usuario a los datos del colaborador
+                $colaborador['usuario_correo'] = $usuario['correo'];
+                $colaborador['usuario_nombre'] = $usuario['nombre'];
+                return $colaborador;
+            }
         }
+        
         return false;
     }
 
@@ -258,9 +285,22 @@ class Conexion {
      */
     public function cambiarPasswordColaborador($colaborador_id, $nueva_contrasena) {
         try {
+            // Obtener el correo del colaborador
+            $stmt = $this->conn->prepare("SELECT correo FROM colaboradores WHERE id = ?");
+            $stmt->bind_param("i", $colaborador_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $colaborador = $result->fetch_assoc();
+            $stmt->close();
+            
+            if (!$colaborador) {
+                return false;
+            }
+            
+            // Actualizar contraseña en la tabla usuarios
             $contrasena_hash = password_hash($nueva_contrasena, PASSWORD_DEFAULT);
-            $stmt = $this->conn->prepare("UPDATE colaboradores SET contrasena = ? WHERE id = ?");
-            $stmt->bind_param("si", $contrasena_hash, $colaborador_id);
+            $stmt = $this->conn->prepare("UPDATE usuarios SET contrasena = ? WHERE correo = ? AND rol = 'colab'");
+            $stmt->bind_param("ss", $contrasena_hash, $colaborador['correo']);
             $result = $stmt->execute();
             $stmt->close();
             return $result;
@@ -438,6 +478,59 @@ class Conexion {
         }
         $stmt->close();
         return $colaboradores;
+    }
+
+    /**
+     * Crear colaborador completo (con usuario y colaborador)
+     */
+    public function crearColaboradorCompleto($datos_colaborador, $datos_usuario) {
+        try {
+            $this->conn->begin_transaction();
+            
+            // 1. Crear usuario
+            $usuario_id = $this->crearUsuario(
+                $datos_usuario['nombre'],
+                $datos_usuario['correo'],
+                'colab',
+                $datos_usuario['contrasena'],
+                1
+            );
+            
+            if (!$usuario_id) {
+                throw new Exception("Error creando usuario");
+            }
+            
+            // 2. Crear colaborador
+            $stmt = $this->conn->prepare("
+                INSERT INTO colaboradores (nombre, apellido, identificacion, direccion, ubicacion, telefono, correo, departamento_id, activo) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+            ");
+            $stmt->bind_param("sssssssi", 
+                $datos_colaborador['nombre'],
+                $datos_colaborador['apellido'],
+                $datos_colaborador['identificacion'],
+                $datos_colaborador['direccion'],
+                $datos_colaborador['ubicacion'],
+                $datos_colaborador['telefono'],
+                $datos_colaborador['correo'],
+                $datos_colaborador['departamento_id']
+            );
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Error creando colaborador: " . $stmt->error);
+            }
+            
+            $colaborador_id = $this->conn->insert_id;
+            $stmt->close();
+            
+            $this->conn->commit();
+            return $colaborador_id;
+            
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Error en crearColaboradorCompleto(): " . $e->getMessage());
+            return false;
+        }
     }
 
     // Obtener solicitudes de un colaborador específico
