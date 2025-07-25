@@ -963,7 +963,7 @@ class Conexion {
             $this->conn->begin_transaction();
             
             // Si el equipo está asignado, liberarlo primero
-            $liberar_sql = "UPDATE asignaciones SET estado = 'devuelto', fecha_devolucion = NOW() 
+            $liberar_sql = "UPDATE asignaciones SET estado = 'devuelto', fecha_retiro = NOW() 
                            WHERE inventario_id = ? AND estado = 'asignado'";
             $liberar_stmt = $this->conn->prepare($liberar_sql);
             $liberar_stmt->bind_param("i", $inventario_id);
