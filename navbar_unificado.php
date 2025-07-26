@@ -133,7 +133,9 @@ if ($es_directorio_colaborador) {
         <div class="profile-pic-wrapper">
           <?php
             // Configurar imagen de perfil por defecto
-            $foto_default = $img_path . 'usuarios/default.jpg';
+            $foto_default = ($es_directorio_usuario || $es_directorio_colaborador) 
+                ? '../img/usuarios/default.jpg' 
+                : 'img/usuarios/default.jpg';
             
             $foto = $foto_default; // Foto por defecto
             $nombreUsuario = "Inicia sesión para continuar";
@@ -155,7 +157,7 @@ if ($es_directorio_colaborador) {
             }
           ?>
           <img src="<?php echo htmlspecialchars($foto); ?>" class="profile-pic-navbar-lg" alt="Foto de perfil" 
-               onerror="this.src='<?php echo $foto_default; ?>';">
+               onerror="if(!this.hasAttribute('data-error-handled')) { this.setAttribute('data-error-handled', 'true'); this.src='<?php echo $foto_default; ?>'; } else { this.style.display='none'; }">
           <div class="profile-username-navbar">
             <?php echo $nombreUsuario; ?>
             <?php if ($rolUsuario): ?>
@@ -163,6 +165,7 @@ if ($es_directorio_colaborador) {
             <?php endif; ?>
           </div>
         </div>
+
       </div>
     </div>
     
@@ -209,7 +212,6 @@ if ($es_directorio_colaborador) {
                   <li><a class="dropdown-item" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
                 </ul>
               </li>
-              <li class="nav-item"><a class="nav-link" href="<?php echo $es_directorio_colaborador ? '' : 'colaboradores/'; ?>Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
             <?php else: ?>
               <!-- Menú para usuarios no logueados -->
               <li class="nav-item"><a class="nav-link" href="<?php echo $login_path; ?>"><i class="fa fa-sign-in-alt"></i> Iniciar Sesión</a></li>

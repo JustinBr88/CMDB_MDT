@@ -8,15 +8,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     formData.append('contrasena', contrasena);
 
     try {
-        // Usar URL completa hacia WAMP desde cualquier puerto
-        const url = 'http://localhost/TheReturnofMDT/validar_login.php';
-        console.log('Enviando a WAMP:', url);
+        // Usar URL relativa para evitar problemas CORS
+        const url = '../validar_login.php';
+        console.log('Enviando validación de login a:', url);
 
         const response = await fetch(url, {
             method: 'POST',
-            body: formData,
-            mode: 'cors', // Permitir CORS
-            credentials: 'same-origin'
+            body: formData
         });
         
         console.log('Response status:', response.status);
@@ -44,13 +42,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             alert(result.mensaje);
             // Redirigir según el tipo de usuario
             if (result.redirect) {
-                window.location.href = `http://localhost/TheReturnofMDT/${result.redirect}`;
+                window.location.href = `../${result.redirect}`;
             } else {
                 // Fallback por tipo
                 if (result.tipo === 'colaborador') {
-                    window.location.href = 'http://localhost/TheReturnofMDT/colaboradores/portal_colaborador.php';
+                    window.location.href = '../colaboradores/portal_colaborador.php';
                 } else {
-                    window.location.href = 'http://localhost/TheReturnofMDT/Usuario/Home.php';
+                    window.location.href = 'Home.php';
                 }
             }
         } else {
@@ -62,7 +60,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         console.error('Mensaje:', error.message);
         
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            alert('Error de conexión: No se puede conectar al servidor WAMP. Verifica que WAMP esté ejecutándose.');
+            alert('Error de conexión: No se puede conectar al servidor. Verifica que el servidor esté ejecutándose.');
         } else {
             alert(`Error de conexión: ${error.message}`);
         }

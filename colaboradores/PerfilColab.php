@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cambiar_password'])) 
                                  class="rounded-circle" 
                                  width="150" height="150" 
                                  style="object-fit: cover; border: 4px solid #007bff;"
-                                 onerror="this.src='../img/usuarios/default.jpg';">
+                                 onerror="if(this.src !== '../img/usuarios/default.jpg') this.src='../img/usuarios/default.jpg'; else this.style.display='none';">
                         </div>
                         <h5><?php echo htmlspecialchars($colaborador['nombre'] . ' ' . $colaborador['apellido']); ?></h5>
                         <p class="text-muted">Colaborador</p>

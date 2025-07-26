@@ -118,7 +118,6 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li><a class="dropdown-item" href="solicitar_donacion.php"><i class="fa fa-heart"></i> Solicitar Donación</a></li>
               </ul>
             </li>
-            <li class="nav-item"><a class="nav-link" href="Colaboradores.php"><i class="fa fa-users"></i> Colaboradores</a></li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <?php if(isset($_SESSION['colaborador_logeado']) && $_SESSION['colaborador_logeado'] === true): ?>
